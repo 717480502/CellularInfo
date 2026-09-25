@@ -69,7 +69,11 @@ Related IPCC installation implementation:
 
 ## Data
 
-### 1. The following features require iOS 17.0 or later.
+### 1. The following features require iOS 26.0 or later.
+>
+* Cellular Data Plan is it a travel eSIM
+
+### 2. The following features require iOS 17.0 or later.
 >
 * Device Enabled 2G Network Switch
 * User Enabled 2G Network Preference
@@ -78,11 +82,11 @@ Related IPCC installation implementation:
 * NR Status (5G SA & 5G NSA) **(Compatibility extended to iOS 14.0+ using an alternative method)**
 * Cellular Usage Workspace Info **(Underlying Data)**
 
-### 2. The following features require iOS 16.4 or later.
+### 3. The following features require iOS 16.4 or later.
 >
 * Device SIM Ready **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 3. The following features require iOS 16.0 or later.
+### 4. The following features require iOS 16.0 or later.
 * Device Supports eSIM **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * eSIM Only Device [(Verified to be compatible with iOS 12.0 or later based on device support data)](https://support.apple.com/en-us/111850)
 * Current Connected Operator Name **(Compatibility extended to iOS 12.0+ using an alternative method)**
@@ -94,13 +98,13 @@ Related IPCC installation implementation:
 * Private Network SIM
 * Should Show Branded Calling Info **(Underlying Data)**
 
-### 4. The following features require iOS 15.4 or later.
+### 5. The following features require iOS 15.4 or later.
 >
 * Device in Factory Debug Mode
 * Baseband Release Candidate Flag
 * Cellular Data Info **(Basic Info)** **(Displays full information using a fallback method, compatible with iOS 12.0 or later)**
 
-### 5. The following features require iOS 15.0 or later.
+### 6. The following features require iOS 15.0 or later.
 >
 * Device information in baseband
 * Carrier English Name
@@ -117,7 +121,7 @@ Related IPCC installation implementation:
 * Lock Network Mode **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * Restore IPCC (Carrier Bundle) to System **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 6. The following features require iOS 14.0 or later.
+### 7. The following features require iOS 14.0 or later.
 > [!WARNING]
 **All data related to 5G networks**  
 >
@@ -143,10 +147,10 @@ Related IPCC installation implementation:
 * Enable or Disable Cellular Plan **(Data retrieval fails on devices running iOS versions below 14.0)**
 * Configure Network Bands (Beta)
 
-### 7. The following features require iOS 13.4 or later.
+### 8. The following features require iOS 13.4 or later.
 * Data Roaming **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 8. The following features require iOS 13.0 or later.
+### 9. The following features require iOS 13.0 or later.
 >
 * Cellular Data Connection Status
 * Allow Mobile Data Switching
@@ -168,12 +172,12 @@ Related IPCC installation implementation:
 * Cellular Internet Connection State **(Underlying Data)**
 * Signal Strength **(Underlying Data)**
 
-### 9. The following features are *no longer supported* on iOS 18.0+
+### 10. The following features are *no longer supported* on iOS 18.0+
 * NR Disable Status **(Supported on iOS 18.0+ via a new implementation)**
 * 5G (NR) Frequency Range **(Supported on iOS 18.0+ via a new implementation)**
 * Data Mode  **(Supported on iOS 18.0+ via a new implementation)**
 
-### 10. Data accessible without extra entitlements
+### 11. Data accessible without extra entitlements
 >
 * Device Spuupots Cellular
 * Device SIM Ready
@@ -207,8 +211,9 @@ Related IPCC installation implementation:
 * Should Show Branded Calling Info **(Underlying Data)**
 * Device Supports Dedicated Bearer **(Data may not be reliable)**
 * IPCC (Carrier Bundle) Compatibility Check **(Basic Info Check)**
+* Cellular Data Plan is it a travel eSIM
 
-### Data that requires the public-cellular-plan entitlement
+### 12. Data that requires the public-cellular-plan entitlement
 
 * Device Supports eSIM
 * Device Allows eSIM Installation
@@ -250,6 +255,8 @@ Related IPCC installation implementation:
 ## Build
 
 ``make package FINALPACKAGE=1 PACKAGE_FORMAT=ipa``
+> [!WARNING]
+> If you are building with Xcode 27 or higher, please set the minimum iOS version to iOS 15.0 or later, which is a new requirement for Xcode 27.
 
 ## License Notice
 

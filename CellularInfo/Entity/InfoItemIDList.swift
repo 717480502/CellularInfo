@@ -148,6 +148,7 @@ enum CoreTelephonyItemID {
     static let carrierBundleOTABeforeUserConfirm = 383
     static let carrierBundlePath = 384
     static let activationTicket = 385
+    static let travelEmbeddedSIM = 386
 }
 
 // CellularPlan的ID

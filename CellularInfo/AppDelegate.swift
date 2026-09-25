@@ -18,11 +18,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 检查设置
         SettingsUtils.instance.checkShowLockNetworkMode()
         
-        // 加载root view
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window!.rootViewController = MainUITabBarController()
-        window!.makeKeyAndVisible()
+        // iOS 12 没有 Scene，需要在 AppDelegate 中创建 Window
+        if #unavailable(iOS 13.0) {
+            window = UIWindow(frame: UIScreen.main.bounds)
+            window!.rootViewController = MainUITabBarController()
+            window!.makeKeyAndVisible()
+        }
+        
         return true
+    }
+    
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        
+        let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+    
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        
     }
 
     /// App从后台返回前台的调用方法
@@ -41,7 +57,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         guard url.pathExtension.lowercased() == "ipcc" else { return }
         
         DispatchQueue.main.async {
-            guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }),
+            var window: UIWindow?
+            
+            if #available(iOS 13.0, *) {
+                guard let windowScene = UIApplication.shared.connectedScenes.first(where: {
+                    $0.activationState == .foregroundActive }) as? UIWindowScene else {
+                    return
+                }
+
+                window = windowScene.windows.first(where: { $0.isKeyWindow })
+            } else {
+                window = UIApplication.shared.keyWindow
+            }
+            
+            // 如果没有拿到Window则返回
+            guard let window = window,
                   let tabBar = window.rootViewController as? MainUITabBarController else {
                 return
             }
@@ -71,4 +101,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
-

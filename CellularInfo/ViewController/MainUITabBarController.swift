@@ -201,10 +201,14 @@ class MainUITabBarController: UITabBarController {
         // iPhone 17 Pro Max = 62
         // iPhone Air = 68
         // iPhone SE3 = 20
+        // iPhone Duo 外屏 竖屏 = 0
+        // iPhone Duo 内屏 竖屏 = 82
         // iPad mini 6 竖屏 = 24
         var badgeViewTopAnchor = CGFloat(0)
         
         switch view.safeAreaInsets.top {
+        case 0: // iPhone Duo 外屏 竖屏
+            badgeViewTopAnchor = -30
         case 19..<26:
             badgeViewTopAnchor = -30
         case ..<45: // 老款刘海屏 放大模式
@@ -229,6 +233,8 @@ class MainUITabBarController: UITabBarController {
             badgeViewTopAnchor = 18.5
         case 68: // iPhone Air 单独适配
             badgeViewTopAnchor = 24.5
+        case 82: // iPhone Duo 内屏 竖屏
+            badgeViewTopAnchor = -30
         default: // 其余情况
             badgeViewTopAnchor = 20
         }

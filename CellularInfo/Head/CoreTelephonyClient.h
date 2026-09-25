@@ -44,6 +44,7 @@
 #import "CTEmergencyModeResult.h"
 #import "CTCellularUsageWorkspaceInfo.h"
 #import "CTBundle.h"
+#import "CTRoamingStatus.h"
 
 @class CoreTelephonyClientMux;
 
@@ -715,12 +716,29 @@ typedef struct {
 // iOS 18.6 头文件diff新增
 - (id)getBootstrapState:(NSError **)error API_AVAILABLE(ios(17.4));
 - (void)getRoamingStatus:(CTXPCServiceSubscriptionContext *)context completion:(id /* block */)completion API_AVAILABLE(ios(18.0));
-- (id)getRoamingStatus:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(18.0));
+- (CTRoamingStatus *)getRoamingStatus:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(18.0));
 - (BOOL)_decodeCardData:(id)data smdp:(id *)smdp matchingID:(id *)id OID:(id *)oid API_AVAILABLE(ios(17.4));
 - (BOOL)acknowledgeIncomingMessages:(id)messages withMessageIDList:(id)idlist withError:(id *)error API_AVAILABLE(ios(18.0));
 - (void)activateCrossPlatformTransport:(unsigned long long)transport completion:(id /* block */)completion;
 - (void)activateTurboMode:(/* block */id)arg1 API_AVAILABLE(ios(18.3));
 - (id)isPrivateNetworkContext:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(18.0)); // iPad 7 蜂窝版测试提示设备不支持
+
+// iOS 26.0 头文件diff新`增
+- (void)isTraveleSIM:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL isTravelESIM, NSError *error))completion API_AVAILABLE(ios(26.0)); // 是否为旅行时使用的eSIM卡
+- (id)copyRequiresResiliency:(CTXPCServiceSubscriptionContext *)context outError:(NSError **)error API_AVAILABLE(ios(26.0));
+- (id)isSharingIdentitySupportedWithError:(NSError **)error API_AVAILABLE(ios(26.0));
+- (id)shouldShowRoamingEducation:(NSError **)error API_AVAILABLE(ios(26.0));
+- (id)shouldShowTravelEducation:(NSError **)error API_AVAILABLE(ios(26.0));
+- (id)supportsLimitedUseSIMsWithError:(NSError **)error API_AVAILABLE(ios(26.0));
+- (BOOL)disableBusinessMessaging:(CTXPCServiceSubscriptionContext *)context withError:(NSError **)error API_AVAILABLE(ios(26.0));
+- (BOOL)enableBusinessMessaging:(CTXPCServiceSubscriptionContext *)context withError:(NSError **)error API_AVAILABLE(ios(26.0));
+- (void)getRegulatedRatsSwitchEnabled:(CTXPCServiceSubscriptionContext *)context completion:(id /* block */)completion API_AVAILABLE(ios(26.0));
+- (BOOL)getRegulatedRatsSwitchEnabledSync:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(26.0));
+- (void)getRegulatedRatsUserPreference:(CTXPCServiceSubscriptionContext *)context completion:(id /* block */)completion API_AVAILABLE(ios(26.0));
+- (BOOL)getRegulatedRatsUserPreferenceSync:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(26.0));
+- (void)getTravelInfoForIccid:(id)iccid completion:(id /* block */)completion API_AVAILABLE(ios(26.0));
+- (id)getSupportsTARandomization:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(26.0));
+- (id)getTARandomizationSetting:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(26.0));
 
 // 扩展CoreTelephony的方法
 typedef struct _CTServerConnection *CTServerConnectionRef;
@@ -733,7 +751,6 @@ extern int _CTServerConnectionGetCellularDataIsEnabled(CTServerConnectionRef con
 extern int _CTServerConnectionSetCellularDataIsEnabled(CTServerConnectionRef connection, uint8_t enabled); // 设置蜂窝数据是否开启
 extern int _CTServerConnectionDebugResetSim(CTServerConnectionRef connection); // 重置SIM卡状态 日志报错 #N no controller to send debug sim reset
 extern int _CTServerConnectionFetchTimeFromNetwork(CTServerConnectionRef connection, int32_t requestType, int32_t *result); // 获取数据无效
-extern int _CTServerConnectionGetTemperature(CTServerConnectionRef connection, int32_t sensorType, uint8_t *valid, int32_t *value1, int32_t *value2); // 获取数据无效
 
 @end
 

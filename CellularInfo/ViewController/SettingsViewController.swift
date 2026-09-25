@@ -291,7 +291,20 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
     /// 重建App界面并且切换到当前的tab
     private func reloadAppView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { // 延迟0.25s 让UISwitch动画放完再去重建App View
-            guard let window = UIApplication.shared.windows.first else {
+            var window: UIWindow?
+
+            if #available(iOS 13.0, *) {
+                guard let windowScene = UIApplication.shared.connectedScenes.first(where: {
+                    $0.activationState == .foregroundActive }) as? UIWindowScene else {
+                    return
+                }
+
+                window = windowScene.windows.first(where: { $0.isKeyWindow })
+            } else {
+                window = UIApplication.shared.keyWindow
+            }
+            // 如果没有拿到Window则返回
+            guard let window = window else {
                 return
             }
 

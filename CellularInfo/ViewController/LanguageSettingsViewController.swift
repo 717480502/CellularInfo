@@ -91,7 +91,22 @@ class LanguageSettingsViewController: UIViewController, UITableViewDelegate, UIT
     }
     
     func reloadAppRootView() {
-        guard let window = UIApplication.shared.windows.first else { return }
+        var window: UIWindow?
+
+        if #available(iOS 13.0, *) {
+            guard let windowScene = UIApplication.shared.connectedScenes.first(where: {
+                $0.activationState == .foregroundActive }) as? UIWindowScene else {
+                return
+            }
+
+            window = windowScene.windows.first(where: { $0.isKeyWindow })
+        } else {
+            window = UIApplication.shared.keyWindow
+        }
+        // 如果没有拿到Window则返回
+        guard let window = window else {
+            return
+        }
 
         let tabBarController = MainUITabBarController()
         window.rootViewController = tabBarController

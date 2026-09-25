@@ -324,7 +324,12 @@ class SystemInfoUtils {
             case "iPhone18,4": return "iPhone Air"
             case "iPhone18,1": return "iPhone 17 Pro"
             case "iPhone18,2": return "iPhone 17 Pro Max"
-            case "iPhone18,5": return "iPhone 17e" // 新2026.3.11 新增iPhone 16e
+            case "iPhone18,5": return "iPhone 17e" // 新2026.3.11 新增iPhone 17e
+            
+            case "iPhone19,2": return "iPhone 18 Pro" // 2026.9.10 新增iPhone 18 Pro/18 Pro Max/iPhone Duo
+            case "iPhone19,3": return "iPhone 18 Pro Max"
+            case "iPhone19,7": return "iPhone 18 Pro Max" // US版本
+            case "iPhone19,4": return "iPhone Duo"
                 
             // iPod
             case "iPod1,1": return "iPod Touch (1st Gen)"

@@ -4616,6 +4616,29 @@ class CellularDataController {
         }
     }
     
+    /// 获取卡槽的卡是否为旅行eSIM卡
+    func getSlotIsTravelEmbeddedSIMInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
+        if #available(iOS 26.0, *) {
+            do {
+                let result = try coreTelephonyController.getSlotIsTravelEmbeddedSIM(context: context)
+                return InfoItem(
+                    id: CoreTelephonyItemID.travelEmbeddedSIM,
+                    text: String.localizedStringWithFormat(NSLocalizedString("travelEmbeddedSIM", comment: ""), result ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: "")),
+                    isConfidential: false
+                )
+            } catch let error as NSError {
+                return InfoItem(
+                    id: CoreTelephonyItemID.travelEmbeddedSIM,
+                    text: String.localizedStringWithFormat(NSLocalizedString("travelEmbeddedSIM", comment: ""), String.localizedStringWithFormat(NSLocalizedString("ErrorWithCodeReason", comment: ""), error.code ,error.localizedDescription)),
+                    isConfidential: false
+                )
+            }
+            
+        } else {
+            return nil
+        }
+    }
+    
     /// 获取卡槽的卡5G NR禁用状态 原始数据
     func getSlotNRStatusInfo(descriptor: CTServiceDescriptor) -> InfoItem? {
         if #available(iOS 14.0, *) {
@@ -4804,7 +4827,9 @@ class CellularDataController {
                 if let internetConnectionState = try coreTelephonyController.getDeviceInternetConnectionState() {
                     return InfoItem(
                         id: CoreTelephonyRAWItemID.internetConnection,
-                        text: String.localizedStringWithFormat(NSLocalizedString("InternetConnectionState", comment: ""), internetConnectionState)
+                        text: String.localizedStringWithFormat(NSLocalizedString("InternetConnectionState", comment: ""), internetConnectionState),
+                        detailText: String(describing: internetConnectionState),
+                        copyable: true
                     )
                 } else {
                     return InfoItem(
@@ -5160,9 +5185,6 @@ class CellularDataController {
                 slotSIMInfoGroup.addItemIfPresent(getSlotSIMLocation(context: context))
                 slotSIMInfoGroup.addItemIfPresent(getSlotsSIMPresent(fullyContext: context))
                 slotSIMInfoGroup.addItemIfPresent(getSlotsSIMGood(fullyContext: context))
-                if experimentalFeatures {
-                    slotSIMInfoGroup.addItemIfPresent(getSlotSIMIsPrivateNetwork(context: context)) // 私有网络SIM
-                }
                 slotSIMInfoGroup.addItem(getSlotSIMCardMCCInfo(context: context))
                 slotSIMInfoGroup.addItem(getSlotSIMCardMNCInfo(context: context))
                 slotSIMInfoGroup.addItem(getSlotMobileSubscriberHomeCountryList(context: context))
@@ -5172,6 +5194,10 @@ class CellularDataController {
                 slotSIMInfoGroup.addItem(getSlotRemainingPUKAttemptCount(context: context))
                 slotSIMInfoGroup.addItem(getSlotSMSCenterNumber(context: context))
                 slotSIMInfoGroup.addItemIfPresent(getSlotSIMPhonebookCount(context: context))
+                if experimentalFeatures {
+                    slotSIMInfoGroup.addItemIfPresent(getSlotSIMIsPrivateNetwork(context: context)) // 私有网络SIM
+                    slotSIMInfoGroup.addItemIfPresent(getSlotIsTravelEmbeddedSIMInfo(context: context)) // 旅行eSIM
+                }
                 
                 // 网络分组
                 let slotNetworkInfoGroup = InfoItemGroup(id: groupID)

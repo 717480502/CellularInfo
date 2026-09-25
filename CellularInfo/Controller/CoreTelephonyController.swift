@@ -49,7 +49,7 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         
         DispatchQueue.main.async {
             // 设置一个2秒的定时器 定时发送数据更新的通知
-            self.refreshDataTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            self.refreshDataTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self = self] _ in
                 NSLog("[CellularInfo] Timer Refresh Data")
                 self?.onDataUpdated?()
             }
@@ -2365,6 +2365,35 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         return result
     }
     
+    /// 获取卡槽的卡是否为旅行eSIM卡
+    /// 强行改成同步方法 测试时仅耗时0.017ms左右 无需担心性能问题
+    /// 无权限时没有抛异常
+    @available(iOS 26.0, *)
+    func getSlotIsTravelEmbeddedSIM(context: CTXPCServiceSubscriptionContext) throws -> Bool {
+        
+        var result: Bool = false
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.isTraveleSIM(context) { isTraveleSIM, error in
+            
+            result = isTraveleSIM
+            finalError = error
+            
+            sema.signal()
+        }
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+    }
+    
     /// 获取调制解调器固件版本
     func getDeviceModemFirmwareVersion() throws -> String? {
         
@@ -2421,29 +2450,6 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
             throw CoreTelephonyConnectionError.apiFailed(code: ret)
         }
         return result
-    }
-
-    /// TODO 获取基带温度
-    /// 返回0 数据无效
-    func fetchTemperature(sensorType: Int32) throws -> (valid: Bool, value1: Int32, value2: Int32) {
-        
-        var valid: UInt8 = 0
-        var value1: Int32 = 0
-        var value2: Int32 = 0
-        
-        let ret = _CTServerConnectionGetTemperature(
-            connection,
-            sensorType,
-            &valid,
-            &value1,
-            &value2
-        )
-        
-        if ret != 0 {
-            throw CoreTelephonyConnectionError.apiFailed(code: ret)
-        }
-        
-        return (valid != 0, value1, value2)
     }
     
     /// 重置SIM卡状态

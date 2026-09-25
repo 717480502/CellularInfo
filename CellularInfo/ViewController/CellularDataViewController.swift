@@ -160,6 +160,8 @@ class CellularDataViewController: UIViewController, UITableViewDelegate, UITable
             
             
             // 使用分组的AutoLayout
+//            slotSegmentedControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+//            slotSegmentedControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
             NSLayoutConstraint.activate([
                 topContainerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
                 topContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

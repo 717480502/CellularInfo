@@ -46,6 +46,7 @@
 -(void)didPurchasePlanForCsn:(id)arg1 iccid:(id)arg2 profileServer:(id)arg3 state:(id)arg4 ;
 -(id)resolveSimLabel:(id)arg1 ;
 -(id)didEnablePlanItems:(id)arg1 ;
+- (id)didEnablePlanItemsForTravel:(id)arg1 API_AVAILABLE(ios(26.0));
 -(void)didSelectPlanForData:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)expirePlan;
 -(void)didDeletePlanItem:(id)arg1 completion:(/*^block*/id)arg2 ;
@@ -115,7 +116,8 @@
 -(void)resumePlanProvisioning:(BOOL)arg1 userConsent:(long long)arg2 completion:(/*^block*/id)arg3 ;
 -(void)addNewRemotePlanWithCardData:(id)arg1 confirmationCode:(id)arg2 isPairing:(BOOL)arg3 withCSN:(id)arg4 withContext:(id)arg5 userConsent:(long long)arg6 completion:(/*^block*/id)arg7 ;
 -(void)getSelectedProxy:(/*^block*/id)arg1 ;
--(void)getPhoneAuthTokenWithMessage:(id)arg1 completion:(/*^block*/id)arg2 ;
+-(void)getPhoneAuthTokenWithMessage:(id)arg1 completion:(/*^block*/id)arg2 ; // iOS 26已移除
+- (unsigned long long)getSupportedFlowTypesWithError:(NSError **)error API_AVAILABLE(ios(26.0));
 -(void)exitSimSetupWithCompletion:(/*^block*/id)arg1 ;
 -(void)setSelectedProxy:(long long)arg1 ;
 -(void)didSelectPlanForDefaultVoice:(id)arg1 completion:(/*^block*/id)arg2 ;
