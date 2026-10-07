@@ -97,6 +97,22 @@
         }
       }
     },
+    "AbbreviatedOperatorName" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abbreviated Operator Name: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "网络名称缩写: %@"
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "en" : {
@@ -6404,6 +6420,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "受限\n\n以下目录不可写入:\n%@"
+          }
+        }
+      }
+    },
+    "RoamingStatus" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Roaming Status\nVoice Roaming: %1$@\nData Roaming: %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "漫游状态\n语音漫游: %1$@\n数据漫游: %2$@"
           }
         }
       }

@@ -1543,6 +1543,31 @@ class CellularDataController {
         return nil
     }
     
+    /// 获取网络名称的缩写
+    func getSlotAbbreviatedOperatorName(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
+        do {
+            let abbreviatedOperatorName = try coreTelephonyController.getSlotAbbreviatedOperatorName(context: context)
+            if radioPreferencesController.getAirplaneMode() { // 判断下是否在飞行模式状态
+                return InfoItem(
+                    id: CommonItemID.abbreviatedOperatorName,
+                    text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    isConfidential: false
+                )
+            }
+            return InfoItem(
+                id: CommonItemID.abbreviatedOperatorName,
+                text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), abbreviatedOperatorName.isEmpty ? NSLocalizedString("NoService", comment: "") : abbreviatedOperatorName),
+                isConfidential: false
+            )
+        } catch {
+            return InfoItem(
+                id: CommonItemID.abbreviatedOperatorName,
+                text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                isConfidential: false
+            )
+        }
+    }
+    
     /// 获取卡槽的卡的电话号码
     func getSlotPhoneNumber(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         if #available(iOS 13.0, *) {
@@ -2368,6 +2393,7 @@ class CellularDataController {
     }
     
     /// 获取当前卡槽可选择的网络类型
+    /// 不允许更改网络类型的SIM卡/运营商返回nil
     func getSlotSupportRatesInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         
         do {
@@ -3253,7 +3279,7 @@ class CellularDataController {
     }
     
     /// 获取当前卡槽用户是否启用数据漫游
-    func  getSlotEnableDataRoaming(descriptor: CTServiceDescriptor) -> InfoItem? {
+    func getSlotEnableDataRoaming(descriptor: CTServiceDescriptor) -> InfoItem? {
         if #available(iOS 13.4, *) {
             do {
                 let enable = try coreTelephonyController.getSlotEnableDataRoaming(descriptor: descriptor)
@@ -3266,6 +3292,32 @@ class CellularDataController {
                 return InfoItem(
                     id: CoreTelephonyItemID.dataRoaming,
                     text: String.localizedStringWithFormat(NSLocalizedString("DataRoaming", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                    isConfidential: false
+                )
+            }
+        } else {
+            return nil
+        }
+    }
+    
+    /// 获取当前网络是否处于漫游状态
+    func getSlotRoamingStatus(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
+        if #available(iOS 18.0, *) {
+            do {
+                let roamingStatus = try coreTelephonyController.getSlotRoamingStatus(context: context)
+                return InfoItem(
+                    id: CoreTelephonyItemID.roamingStatus,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RoamingStatus", comment: ""),
+                                                           roamingStatus.isVoiceRoaming ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: ""),
+                                                           roamingStatus.isDataRoaming ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: "")),
+                    isConfidential: false
+                )
+            } catch {
+                return InfoItem(
+                    id: CoreTelephonyItemID.roamingStatus,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RoamingStatus", comment: ""),
+                                                           NSLocalizedString("NoPermission", comment: ""),
+                                                           NSLocalizedString("NoPermission", comment: "")),
                     isConfidential: false
                 )
             }
@@ -5304,6 +5356,7 @@ class CellularDataController {
                 slotBasicInfoGroup.addItem(getSlotCarrierName(context: context))
                 slotBasicInfoGroup.addItem(getSlotLocalizedOperatorName(context: context))
                 slotBasicInfoGroup.addItemIfPresent(getSlotOperatorEnglishName(context: context))
+                slotBasicInfoGroup.addItemIfPresent(getSlotAbbreviatedOperatorName(context: context))
                 slotBasicInfoGroup.addItemIfPresent(getSlotPhoneNumber(context: context))
                 if experimentalFeatures {
                     slotBasicInfoGroup.addItemIfPresent(getSlotPhoneNumberEditable(context: context))
@@ -5416,6 +5469,7 @@ class CellularDataController {
                 slotConfigGroup.addItem(getSlotNetworkSelectionMode(context: context))
                 slotConfigGroup.addItem(getSlotNetworkSelectionMenuAvailable(context: context))
                 slotConfigGroup.addItemIfPresent(getSlotEnableDataRoaming(descriptor: descriptor))
+                slotConfigGroup.addItemIfPresent(getSlotRoamingStatus(context: context))
                 slotConfigGroup.addItemIfPresent(getSlotLowDataMode(descriptor: descriptor))
                 slotConfigGroup.addItemIfPresent(getSlotLimitIPTrackingEnabled(descriptor: descriptor))
                 if experimentalFeatures {

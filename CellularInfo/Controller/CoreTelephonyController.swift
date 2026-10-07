@@ -931,6 +931,7 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     /// 返回值 2 = 3G
     /// 返回值 3 = 4G
     /// 返回值 4 = 5G
+    /// 不允许更改网络类型的SIM卡/运营商返回nil
     func getSlotSupportRates(context: CTXPCServiceSubscriptionContext) throws -> [Int64] {
         return try coreTelephonyClient.getSupportedDataRates(context).rates as! [Int64]
     }
@@ -1114,6 +1115,33 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         return try coreTelephonyClient.getLocalizedOperatorName(context)
     }
     
+    /// 获取网络名称的缩写
+    /// 强行改成同步方法 测试时仅耗时0.04ms左右 无需担心性能问题
+    /// 无权限时抛异常 错误代码1
+    func getSlotAbbreviatedOperatorName(context: CTXPCServiceSubscriptionContext) throws -> String {
+        
+        var result: String = ""
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.copyAbbreviatedOperatorName(context) { operatorName, error in
+            result = operatorName ?? ""
+            finalError = error
+            
+            sema.signal()
+        }
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+    }
+    
     /// 获取网络运营商英文名称
     /// 使用运营商/网络名词获取这个运营商/网络的英文名
     /// 无低版本替代方案
@@ -1168,6 +1196,15 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
             throw error
         }
         return result
+    }
+    
+    /// 获取当前网络是否处于漫游状态
+    /// isVoiceRoaming 是否在语音漫游
+    /// isDataRoaming 是否在数据漫游
+    /// 无权限设备抛异常 错误代码 1
+    @available(iOS 18.0, *)
+    func getSlotRoamingStatus(context: CTXPCServiceSubscriptionContext) throws -> CTRoamingStatus {
+        return try coreTelephonyClient.getRoamingStatus(context)
     }
     
     /// 获取当前卡槽是否设置低数据模式 iOS 14+

@@ -73,7 +73,11 @@ Related IPCC installation implementation:
 >
 * Cellular Data Plan is it a travel eSIM
 
-### 2. The following features require iOS 17.0 or later.
+### 2. The following features require iOS 18.0 or later.
+>
+* Roaming Status
+
+### 3. The following features require iOS 17.0 or later.
 >
 * Device Enabled 2G Network Switch
 * User Enabled 2G Network Preference
@@ -82,11 +86,11 @@ Related IPCC installation implementation:
 * NR Status (5G SA & 5G NSA) **(Compatibility extended to iOS 14.0+ using an alternative method)**
 * Cellular Usage Workspace Info **(Underlying Data)**
 
-### 3. The following features require iOS 16.4 or later.
+### 4. The following features require iOS 16.4 or later.
 >
 * Device SIM Ready **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 4. The following features require iOS 16.0 or later.
+### 5. The following features require iOS 16.0 or later.
 * Device Supports eSIM **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * eSIM Only Device [(Verified to be compatible with iOS 12.0 or later based on device support data)](https://support.apple.com/en-us/111850)
 * Current Connected Operator Name **(Compatibility extended to iOS 12.0+ using an alternative method)**
@@ -98,13 +102,13 @@ Related IPCC installation implementation:
 * Private Network SIM
 * Should Show Branded Calling Info **(Underlying Data)**
 
-### 5. The following features require iOS 15.4 or later.
+### 6. The following features require iOS 15.4 or later.
 >
 * Device in Factory Debug Mode
 * Baseband Release Candidate Flag
 * Cellular Data Info **(Basic Info)** **(Displays full information using a fallback method, compatible with iOS 12.0 or later)**
 
-### 6. The following features require iOS 15.0 or later.
+### 7. The following features require iOS 15.0 or later.
 >
 * Device information in baseband
 * Carrier English Name
@@ -121,7 +125,7 @@ Related IPCC installation implementation:
 * Lock Network Mode **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * Restore IPCC (Carrier Bundle) to System **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 7. The following features require iOS 14.0 or later.
+### 8. The following features require iOS 14.0 or later.
 > [!WARNING]
 **All data related to 5G networks**  
 >
@@ -147,10 +151,10 @@ Related IPCC installation implementation:
 * Enable or Disable Cellular Plan **(Data retrieval fails on devices running iOS versions below 14.0)**
 * Configure Network Bands (Beta)
 
-### 8. The following features require iOS 13.4 or later.
+### 9. The following features require iOS 13.4 or later.
 * Data Roaming **(Compatibility extended to iOS 12.0+ using an alternative method)**
 
-### 9. The following features require iOS 13.0 or later.
+### 10. The following features require iOS 13.0 or later.
 >
 * Cellular Data Connection Status
 * Allow Mobile Data Switching
@@ -172,12 +176,12 @@ Related IPCC installation implementation:
 * Cellular Internet Connection State **(Underlying Data)**
 * Signal Strength **(Underlying Data)**
 
-### 10. The following features are *no longer supported* on iOS 18.0+
+### 11. The following features are *no longer supported* on iOS 18.0+
 * NR Disable Status **(Supported on iOS 18.0+ via a new implementation)**
 * 5G (NR) Frequency Range **(Supported on iOS 18.0+ via a new implementation)**
 * Data Mode  **(Supported on iOS 18.0+ via a new implementation)**
 
-### 11. Data accessible without extra entitlements
+### 12. Data accessible without extra entitlements
 >
 * Airplane Mode Status
 * Device Supports Cellular
@@ -214,7 +218,7 @@ Related IPCC installation implementation:
 * IPCC (Carrier Bundle) Compatibility Check **(Basic Info Check)**
 * Cellular Data Plan is it a travel eSIM
 
-### 12. Data that requires the public-cellular-plan entitlement
+### 13. Data that requires the public-cellular-plan entitlement
 
 * Device Supports eSIM
 * Device Allows eSIM Installation
@@ -244,6 +248,7 @@ Related IPCC installation implementation:
 * iOS 18.7 iPhone 16 Pro Max **(without entitlements)**
 * iOS 18.7.1 iPhone 16 Pro Max **(without entitlements)**
 * iOS 26.1 iPhone 17 Pro Max **(without entitlements)**
+* iOS 26.5 iPhone 17 Pro Max **(without entitlements)**
 * iOS 26.1 iPhone 17 Pro **(without entitlements)**
 * iOS 26.1 iPhone 17 Air **(without entitlements)**
 
