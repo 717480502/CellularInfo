@@ -177,6 +177,38 @@
         }
       }
     },
+    "AirplaneMode" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<Airplane Mode>"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "<飞行模式>"
+          }
+        }
+      }
+    },
+    "AirplaneModeStatus" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Airplane Mode: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "飞行模式: %@"
+          }
+        }
+      }
+    },
     "Alert" : {
       "localizations" : {
         "en" : {
@@ -3486,6 +3518,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "高成本网络: %@"
+          }
+        }
+      }
+    },
+    "InterfaceCostExpensiveHint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the current slot is set to “Standard” or “Low Data Mode”, the system considers the network expensive. With “Allow More Data on 5G”, the network is considered non-expensive."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前卡槽的数据模式设置为“标准”或“低数据模式”时，系统会将网络视为高成本网络。设置为“5G时允许使用更多数据”时，则不会将其视为高成本网络。"
           }
         }
       }

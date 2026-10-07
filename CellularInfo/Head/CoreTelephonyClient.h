@@ -9,7 +9,6 @@
   https://headers.82flex.com/diff/17.0_21A329...18.6_22G86/System/Library/Frameworks/CoreTelephony.framework/CoreTelephony/CoreTelephonyClient.h
 */
 
-
 //#import <CoreTelephony/CoreTelephony-Structs.h>
 #import "CTXPCServiceSubscriptionInfo.h"
 #import "CTXPCContexts.h"
@@ -723,7 +722,7 @@ typedef struct {
 - (void)activateTurboMode:(/* block */id)arg1 API_AVAILABLE(ios(18.3));
 - (id)isPrivateNetworkContext:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(18.0)); // iPad 7 蜂窝版测试提示设备不支持
 
-// iOS 26.0 头文件diff新`增
+// iOS 26.0 头文件diff新增
 - (void)isTraveleSIM:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL isTravelESIM, NSError *error))completion API_AVAILABLE(ios(26.0)); // 是否为旅行时使用的eSIM卡
 - (id)copyRequiresResiliency:(CTXPCServiceSubscriptionContext *)context outError:(NSError **)error API_AVAILABLE(ios(26.0));
 - (id)isSharingIdentitySupportedWithError:(NSError **)error API_AVAILABLE(ios(26.0));

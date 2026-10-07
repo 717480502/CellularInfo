@@ -179,11 +179,12 @@ Related IPCC installation implementation:
 
 ### 11. Data accessible without extra entitlements
 >
-* Device Spuupots Cellular
+* Airplane Mode Status
+* Device Supports Cellular
 * Device SIM Ready
 * Cellular Data Enabled Status
 * Cellular Data Connection Status
-* Baseband Release Candidate Flag
+* Base band Release Candidate Flag
 * Requires eSIM Setup Status
 * Show eSIM Tips During Roaming Status
 * Carrier Name **(below iOS 16.4)**

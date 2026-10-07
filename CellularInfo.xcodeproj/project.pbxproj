@@ -28,6 +28,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Libraries/AppSupport.tbd,
 				Libraries/CellularPlanManager.tbd,
 				Libraries/libMobileGestalt.tbd,
 			);
@@ -37,6 +38,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Libraries/AppSupport.Sim.tbd,
 				Libraries/CellularPlanManager.Sim.tbd,
 				Libraries/libMobileGestalt.Sim.tbd,
 			);

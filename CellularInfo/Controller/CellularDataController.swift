@@ -22,6 +22,7 @@ class CellularDataController {
     
     private let coreTelephonyNetworkInfoController = CoreTelephonyNetworkInfoController.instance
     private let cellularPlanController = CTCellularPlanController.instance
+    private let radioPreferencesController = RadioPreferencesController.instance
     private let deviceInfoController = MGDeviceInfoController.instance
     // IMEI数量
     private let IMEICount: Int
@@ -629,6 +630,15 @@ class CellularDataController {
         return placeholder
     }
     
+    /// 获取设备的飞行模式状态
+    /// 无权限也能获取正确结果
+    func getDeviceAirplaneModeEnabled() -> InfoItem {
+        return InfoItem(
+            id: CoreTelephonyItemID.airplaneMode,
+            text: String.localizedStringWithFormat(NSLocalizedString("AirplaneModeStatus", comment: ""), radioPreferencesController.getAirplaneMode() ? NSLocalizedString("TurnOn", comment: "") : NSLocalizedString("TurnOff", comment: ""))
+        )
+    }
+    
     /// 获取设备的蜂窝数据是否已开启
     /// 无权限也能获取正确结果
     func getDeviceCellularDataEnabled() -> InfoItem {
@@ -659,7 +669,12 @@ class CellularDataController {
                     case -1: availabilityText = NSLocalizedString("CellularDataDisabled", comment: "")
                     case -2: availabilityText = NSLocalizedString("DataRoamingDisabled", comment: "")
                     case -3: availabilityText = NSLocalizedString("Checking", comment: "") // TODO 暂时不知道这个具体含义 短暂出现 使用 检查中占位
-                    case -5: availabilityText = NSLocalizedString("NotConnected", comment: "")
+                    case -5: // 蜂窝网络未连接时判断下是否在飞行模式下
+                        if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                            availabilityText = NSLocalizedString("AirplaneMode", comment: "")
+                        } else {
+                            availabilityText = NSLocalizedString("NotConnected", comment: "")
+                        }
                     case 1, 24: availabilityText = NSLocalizedString("SwitchingCellularData", comment: "")
                     case 94: availabilityText = NSLocalizedString("ManuallySelectNetwork", comment: "")
                     default: availabilityText = String.localizedStringWithFormat(NSLocalizedString("UnknownWithError", comment: ""), String(availability.csiError))
@@ -1450,6 +1465,13 @@ class CellularDataController {
     func getSlotOperatorName(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         if #available(iOS 16.0, *) {
             do {
+                if radioPreferencesController.getAirplaneMode() { // 判断下是否在飞行模式状态
+                    return InfoItem(
+                        id: CommonItemID.operatorName,
+                        text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                        isConfidential: false
+                    )
+                }
                 let operatorName = try coreTelephonyController.getSlotOperatorName(context: context)
                 return InfoItem(
                     id: CommonItemID.operatorName,
@@ -1470,6 +1492,13 @@ class CellularDataController {
     /// 获取卡槽当前连接的网络名称
     func getSlotLocalizedOperatorName(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 判断下是否在飞行模式状态
+                return InfoItem(
+                    id: CommonItemID.operatorName,
+                    text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    isConfidential: false
+                )
+            }
             let operatorName = try coreTelephonyController.getSlotLocalizedOperatorName(context: context)
             return InfoItem(
                 id: CommonItemID.operatorName,
@@ -1489,6 +1518,13 @@ class CellularDataController {
     func getSlotOperatorEnglishName(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         if #available(iOS 15.0, *) {
             do {
+                if radioPreferencesController.getAirplaneMode() { // 判断下是否在飞行模式状态
+                    return InfoItem(
+                        id: CommonItemID.operatorName,
+                        text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                        isConfidential: false
+                    )
+                }
                 let operatorName = try coreTelephonyController.getSlotLocalizedOperatorName(context: context)
                 let EnglishName = try coreTelephonyController.getSlotEnglishCarrierName(operatorName: operatorName)
                 return InfoItem(
@@ -1914,6 +1950,13 @@ class CellularDataController {
     /// 获取SIM卡注册状态
     func getSlotRegistrationStatus(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.registrationStatus,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RegistrationStatus", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    isConfidential: false
+                )
+            }
             let RegistrationStatus = try coreTelephonyController.getSlotRegistrationStatus(context: context)
             return InfoItem(
                 id: CoreTelephonyItemID.registrationStatus,
@@ -2046,6 +2089,14 @@ class CellularDataController {
     
     /// 获取移动网络标识（PLMN）
     func getSlotPLMNInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
+        if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+            return InfoItem(
+                id: CoreTelephonyItemID.PLMN,
+                text: String.localizedStringWithFormat(NSLocalizedString("PLMN", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                hintText: NSLocalizedString("PLMNHint", comment: ""),
+                isConfidential: false
+            )
+        }
         if #available(iOS 13.0, *) {
             do {
                 let PLMN = try coreTelephonyController.getSlotPLMN(context: context)
@@ -2088,6 +2139,14 @@ class CellularDataController {
     /// 获取卡槽连接的移动网络国家代码
     func getSlotServingMCCInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingMCC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingMCC", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("MCCHint", comment: ""),
+                    isConfidential: false
+                )
+            }
             let MCC = try coreTelephonyController.getSlotServingMCC(context: context)
             return InfoItem(
                 id: CoreTelephonyItemID.servingMCC,
@@ -2109,6 +2168,14 @@ class CellularDataController {
     func getSlotLastRegisteredNetworkMCCInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         if #available(iOS 13.0, *) {
             do {
+                if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                    return InfoItem(
+                        id: CoreTelephonyItemID.lastKnownMCC,
+                        text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMCC", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                        hintText: NSLocalizedString("MCCHint", comment: ""),
+                        isConfidential: false
+                    )
+                }
                 let MCC = try coreTelephonyController.getSlotLastKnownMCC(context: context)
                 return InfoItem(
                     id: CoreTelephonyItemID.lastKnownMCC,
@@ -2163,6 +2230,14 @@ class CellularDataController {
     /// 获取卡槽连接的移动网络运营商代码
     func getSlotServingMNCInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingMNC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingMNC", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("MNCHint", comment: ""),
+                    isConfidential: false
+                )
+            }
             let MNC = try coreTelephonyController.getSlotServingMNC(context: context)
             return InfoItem(
                 id: CoreTelephonyItemID.servingMNC,
@@ -2183,6 +2258,14 @@ class CellularDataController {
     /// 获取卡槽连接的移动网络运营商所属区域代码
     func getSlotLastRegisteredNetworkMNCCountryCodeInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.lastKnownMNCCountryCode,
+                    text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMNCCountryCode", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("MCCHint", comment: ""),
+                    isConfidential: false
+                )
+            }
             let MNCCountryCode = try coreTelephonyController.getSlotLastKnownMNCCountryCode(context: context)
             return InfoItem(
                 id: CoreTelephonyItemID.lastKnownMNCCountryCode,
@@ -2316,6 +2399,13 @@ class CellularDataController {
     /// 获取 InfoItem 数据
     func getSlotRadioAccessTechnologyInfo(slotID: Int, context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.radioAccessTechnology,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RadioAccessTechnology", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    isConfidential: false
+                )
+            }
             let radioAccessTechnology = try coreTelephonyController.getSlotRadioAccessTechnology(context: context)
             return InfoItem(
                 id: CoreTelephonyItemID.radioAccessTechnology,
@@ -2336,7 +2426,13 @@ class CellularDataController {
     func getSlotSignalStrengthInfo(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
             if let signalStrength = try coreTelephonyController.getSlotSignalStrengthInfo(context: context) {
-                
+                if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                    return InfoItem(
+                        id: CoreTelephonyItemID.signalStrength,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                        isConfidential: false
+                    )
+                }
                 if getSlotRadioAccessTechnology(context: context) == .NO_SERVICE { // 判断下是否是无服务状态
                     return InfoItem(
                         id: CoreTelephonyItemID.signalStrength,
@@ -2610,6 +2706,14 @@ class CellularDataController {
     /// 获取连接基站的ID
     func getSlotServingCellID(descriptor: CTServiceDescriptor) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.cellId,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingCellID", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("ServingCellIDHint", comment: ""),
+                    isConfidential: false
+                )
+            }
             if let cellID = try coreTelephonyController.getSlotServingCellID(descriptor: descriptor) {
                 return InfoItem(
                     id: CoreTelephonyItemID.cellId,
@@ -2692,7 +2796,12 @@ class CellularDataController {
     /// 5G SA状态下的数据不准确
     /// *需要改进*
     func getSlotServingBandwidth(context: CTXPCServiceSubscriptionContext, cellInfo: CTCellInfo) -> InfoItem {
-        
+        if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+            return InfoItem(
+                id: CoreTelephonyItemID.bandwidth,
+                text: String.localizedStringWithFormat(NSLocalizedString("Bandwidth", comment: ""), NSLocalizedString("AirplaneMode", comment: ""))
+            )
+        }
         if let bandwidth = coreTelephonyController.getSlotServingBandwidth(cellInfo: cellInfo) {
             switch getSlotBandRadioAccessTechnology(cellInfo: cellInfo).generation {
             case ._5G:
@@ -2799,6 +2908,13 @@ class CellularDataController {
     
     /// 获取卡槽的卡允许的最大发射功率
     func getSlotMaximumTransmitPowerLimit(cellInfo: CTCellInfo) -> InfoItem {
+        if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+            return InfoItem(
+                id: CoreTelephonyItemID.PMax,
+                text: String.localizedStringWithFormat(NSLocalizedString("MaximumTransmitPowerLimit", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                hintText: NSLocalizedString("MaximumTransmitPowerLimitHint", comment: "")
+            )
+        }
         if let PMax = coreTelephonyController.getSlotPMax(cellInfo: cellInfo) {
             return InfoItem(
                 id: CoreTelephonyItemID.PMax,
@@ -2884,7 +3000,14 @@ class CellularDataController {
     
     /// 获取卡槽的卡连接基站的TAC
     func getSlotServingTrackingAreaCode(cellInfo: CTCellInfo) -> InfoItem? {
-        if let TAC = coreTelephonyController.getSlotServingTrackingAreaCode(cellInfo: cellInfo) {
+        if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+            return InfoItem(
+                id: CoreTelephonyItemID.servingTAC,
+                text: String.localizedStringWithFormat(NSLocalizedString("ServingTrackingAreaCode", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                hintText: NSLocalizedString("ServingTrackingAreaCodeHint", comment: ""),
+                isConfidential: true
+            )
+        } else if let TAC = coreTelephonyController.getSlotServingTrackingAreaCode(cellInfo: cellInfo) {
             return InfoItem(
                 id: CoreTelephonyItemID.servingTAC,
                 text: String.localizedStringWithFormat(NSLocalizedString("ServingTrackingAreaCode", comment: ""), TAC),
@@ -2898,6 +3021,13 @@ class CellularDataController {
     /// 同步获取当前卡槽的卡连接基站LAC
     func getSlotServingLocationAreaCode(context: CTXPCServiceSubscriptionContext) -> InfoItem {
         do {
+            if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingLAC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingLocationAreaCode", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("ServingLocationAreaCodeHint", comment: "")
+                )
+            }
             if let servingLAC = try coreTelephonyController.getSlotServingLocationAreaCode(context: context) {
                 return InfoItem(
                     id: CoreTelephonyItemID.servingLAC,
@@ -3079,7 +3209,12 @@ class CellularDataController {
             let networkSelectionMode = try coreTelephonyController.getSlotNetworkSelectionMode(context: context)
             let networkSelectionModeText: String
             switch networkSelectionMode {
-            case 0: networkSelectionModeText = NSLocalizedString("NoService", comment: "")
+            case 0: // 无服务 先判断下是否是飞行模式
+                if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
+                    networkSelectionModeText = NSLocalizedString("AirplaneMode", comment: "")
+                } else {
+                    networkSelectionModeText = NSLocalizedString("NoService", comment: "")
+                }
             case 1: networkSelectionModeText = NSLocalizedString("Automatic", comment: "")
             case 2: networkSelectionModeText = NSLocalizedString("Manual", comment: "")
             case 3: networkSelectionModeText = NSLocalizedString("Disabled", comment: "")
@@ -3178,7 +3313,8 @@ class CellularDataController {
                 let expensive = try coreTelephonyController.getSlotInterfaceCostExpensive(descriptor: descriptor)
                 return InfoItem(
                     id: CommonItemID.interfaceCostExpensive,
-                    text: String.localizedStringWithFormat(NSLocalizedString("InterfaceCostExpensive", comment: ""), expensive ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: ""))
+                    text: String.localizedStringWithFormat(NSLocalizedString("InterfaceCostExpensive", comment: ""), expensive ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: "")),
+                    hintText: NSLocalizedString("InterfaceCostExpensiveHint", comment: "")
                 )
             } catch let error as NSError {
                 if error.code == 13 { // 无权限
@@ -5071,10 +5207,11 @@ class CellularDataController {
             
             let cellularStatusGroup = InfoItemGroup(id: CellularDataItemGroupID.deviceCellularInfo)
             cellularStatusGroup.titleText = NSLocalizedString("CellularStatus", comment: "")
-            cellularStatusGroup.addItem(getSIMTrayStatus())
-            cellularStatusGroup.addItem(getDeviceIsAnySIMReadyInfo())
+            cellularStatusGroup.addItem(getDeviceAirplaneModeEnabled())
             cellularStatusGroup.addItem(getDeviceCellularDataEnabled())
             cellularStatusGroup.addItemIfPresent(getInternetConnectionAvailability())
+            cellularStatusGroup.addItem(getSIMTrayStatus())
+            cellularStatusGroup.addItem(getDeviceIsAnySIMReadyInfo())
             cellularStatusGroup.addItemIfPresent(getPreferredDataSelectRateInfo())
             cellularStatusGroup.addItemIfPresent(getPreferredDataSlotInfo())
             cellularStatusGroup.addItemIfPresent(getDefaultVoiceSlotInfo())
@@ -5120,6 +5257,8 @@ class CellularDataController {
                 
                 deviceInfoGroup.append(underlyingDataGroup)
             }
+        } else { // 虽然不支持蜂窝网络，但是可以显示飞行模式状态
+            deviceBaseInfoGroup.addItem(getDeviceAirplaneModeEnabled())
         }
         
         return deviceInfoGroup
