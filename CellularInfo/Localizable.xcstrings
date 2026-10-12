@@ -8279,6 +8279,38 @@
         }
       }
     },
+    "UnconditionalCallForwarding" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unconditional Call Forwarding: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无条件呼叫转移: %@"
+          }
+        }
+      }
+    },
+    "UnconditionalCallForwardingHint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When enabled, all incoming calls are forwarded to the specified phone number without ringing on this device. You can contact your carrier or configure call forwarding in Settings."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后，所有来电都会直接转移到指定的电话号码，本机不会响铃。您可以联系运营商或在系统设置中配置呼叫转移。"
+          }
+        }
+      }
+    },
     "UnderlyingData" : {
       "localizations" : {
         "en" : {

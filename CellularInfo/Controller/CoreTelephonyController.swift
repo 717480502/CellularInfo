@@ -1317,6 +1317,32 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         return try coreTelephonyClient.getSmscAddress(context)
     }
     
+    /// 获取卡操作的卡是否开启无条件呼叫转移
+    /// 无权限时返回NO 并且抛异常错误代码 13
+    func getSlotUnconditionalCallForwardingActive(context: CTXPCServiceSubscriptionContext) throws -> Bool {
+        var result: Bool = false
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.isUnconditionalCallForwardingActive(context) { status, error in
+            
+            result = status
+            finalError = error
+            
+            sema.signal()
+        }
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+    }
+    
     /// 获取卡槽紧急呼叫号码列表
     /// 返回值 紧急号码的数组[String]
     /// 无权限时抛出异常
@@ -2400,6 +2426,36 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         }
         
         return result
+    }
+    
+    /// 获取固件升级相关信息
+    /// 暂时没有解析
+    /// 无权限设备抛异常 错误代码 1
+    @available(iOS 17.0, *)
+    func getDeviceFirmwareUpdateInfo() throws -> [String: Any] {
+        
+        var result: [String: Any] = [:]
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.copyFirmwareUpdateInfo() { info, error in
+            
+            result = info as? [String: Any] ?? [:]
+            finalError = error
+            
+            sema.signal()
+        }
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+        
     }
     
     /// 获取卡槽的卡是否为旅行eSIM卡

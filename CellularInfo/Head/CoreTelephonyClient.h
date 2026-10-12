@@ -118,8 +118,10 @@ typedef struct {
 - (NSError *)getPacketContextCount:(uint32_t *)count; // TODO
 -(void)getActiveConnections:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(NSArray <NSString *> *)getActiveConnections:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error ; // 获取当前卡槽激活的数据服务类型
+-(id)private_getActiveConnections:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error;
 -(NSString *)getTypeAllocationCode:(CTServiceDescriptor *)descriptor error:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取当前卡槽使用的Type Allocation Code 就是IMEI前8位
--(NSString *)getLocalizedOperatorName:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取网络名称
+-(NSString *)getLocalizedOperatorName:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取网络名称 同步方法
+- (void)copyLocalizedOperatorName:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(id result))completion; // 获取网络名称 异步方法
 -(NSString *)getOperatorName:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(16.0)); // 获取网络名称 跟上面的方法获取的是一样的内容
 -(void)copyOperatorName:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(NSString *)getEnglishCarrierNameFor:(NSString *)operatorName error:(NSError **)error API_AVAILABLE(ios(15.0)); // 获取运营商的英文名
@@ -283,9 +285,9 @@ typedef struct {
 -(void)copyCellId:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2; // 返回cellID本身
 - (CTCellIdInfo *)copyPublicCellId:(CTServiceDescriptor *)descriptor error:(NSError **)error ; // 返回cellIdInfo 实例
 -(void)copyCellInfo:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(CTCellInfo * info, NSError * error))completion; // 获取连接信息
--(void)copyEmergencyMode:(/*^block*/id)arg1 ;
--(CTEmergencyModeResult *)copyEmergencyModeWithError:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取设备紧急状态的实例
-- (void)copyFirmwareUpdateInfo:(void (^)(NSDictionary *info, NSError *error))completion API_AVAILABLE(ios(17.0)); // TODO 可以拿到很多固件信息
+-(void)copyEmergencyMode:(/*^block*/id)arg1 API_AVAILABLE(ios(13.0)); // 获取设备紧急状态的实例 异步方法
+-(CTEmergencyModeResult *)copyEmergencyModeWithError:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取设备紧急状态的实例 同步方法
+- (void)copyFirmwareUpdateInfo:(void (^)(NSDictionary *info, NSError *error))completion API_AVAILABLE(ios(17.0)); // 固件信息
 -(void)copyIsDataAttached:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL status, NSError *error))completion; // 获取数据是否已附加 异步方法
 -(void)copyIsInHomeCountry:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2 ; // 异步方法 判断当前卡是否在漫游
 - (NSNumber *)copyIsInHomeCountry:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(13.0)); // 同步方法 判断当前卡是否在漫游
@@ -293,7 +295,6 @@ typedef struct {
 - (NSString *)copyLastKnownMobileCountryCode:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取最后已知MCC
 -(void)copyLastKnownMobileSubscriberCountryCode:(id)arg1 completion:(/*^block*/id)arg2 ;
 - (NSString *)copyLastKnownMobileSubscriberCountryCode:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取最后已知MNC所属国家/地区的代码
-- (void)copyLocalizedOperatorName:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(id result))completion;
 -(void)copyLocationAreaCode:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(NSNumber * lac, NSError *error))completion; // 获取LAC
 -(id)copyMccOrPlmnsListForIso3CountryCode:(NSString *)Iso3CountryCode error:(id*)error ; // TODO
 -(id)copyMobileSubscriberIso3CountryCode:(id)arg1 MNC:(id)arg2 error:(id*)arg3 ;
@@ -305,12 +306,12 @@ typedef struct {
 -(void)dataUsageForLastPeriodsOnActivePairedDevice:(unsigned long long)arg1 completion:(/*^block*/id)arg2 ;
 -(void)deleteHiddenSims:(/*^block*/id)arg1 ;
 -(void)deleteLowLatencyFilter:(id)arg1 pdp:(int)arg2 queueSetId:(unsigned long long)arg3 uplink:(BOOL)arg4 completion:(/*^block*/id)arg5 ;
-//-(id)deletePersonalWallet:(id)arg1 ; // 删除eSIM全部数据
-//-(void)deletePersonalWallet:(id)arg1 completion:(/*^block*/id)arg2 ;
+-(id)deletePersonalWallet:(id)arg1 ; // 删除某一个存储的SIM卡信息 就是蜂窝网络设置里面已经拔掉/移除的卡
+-(void)deletePersonalWallet:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)deleteTransferPlansForImei:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)deleteZone:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)disableRejectedIccid:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0));
--(void)dispatchBlockToClientAsync:(/*^block*/id)arg1 ;
+-(void)dispatchBlockToClientAsync:(void (^)(BOOL status))completion API_AVAILABLE(ios(15.0)); // TODO 返回NO
 -(void)encryptDataForPlan:(id)arg1 data:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(void)encryptDataWithCarrierIdentifiers:(id)arg1 mnc:(id)arg2 gid1:(id)arg3 gid2:(id)arg4 data:(id)arg5 completion:(/*^block*/id)arg6 ;
 -(id)endPlanTransferForEndPoint:(unsigned long long)arg1 ;
@@ -337,9 +338,9 @@ typedef struct {
 -(id)forceRollAllTransportKeys;
 -(void)generateAuthenticationInfoUsingSim:(id)arg1 authParams:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(void)get2GSwitchEnabled:(/*^block*/id)arg1 API_AVAILABLE(ios(17.0));
--(BOOL)get2GSwitchEnabledSync:(NSError **)error API_AVAILABLE(ios(17.0)) NS_SWIFT_NOTHROW;
+-(BOOL)get2GSwitchEnabledSync:(NSError **)error API_AVAILABLE(ios(17.0)) NS_SWIFT_NOTHROW; // 获取2G网络开关状态 同步方法
 -(void)get2GUserPreference:(/*^block*/id)arg1 API_AVAILABLE(ios(17.0));
--(BOOL)get2GUserPreferenceSync:(NSError **)error API_AVAILABLE(ios(17.0)) NS_SWIFT_NOTHROW;
+-(BOOL)get2GUserPreferenceSync:(NSError **)error API_AVAILABLE(ios(17.0)) NS_SWIFT_NOTHROW; // 获取2G网络开关设置状态 同步方法
 -(void)set2GUserPreference:(BOOL)arg1 completion:(/*^block*/id)arg2 API_AVAILABLE(ios(17.0));
 -(void)getAnbrActivationState:(id)arg1 completion:(/*^block*/id)arg2 API_AVAILABLE(ios(16.0));
 -(id)getBasebandRadioFrequencyFrontEndScanData:(NSError **)error ; // 需要internal权限
@@ -348,12 +349,12 @@ typedef struct {
 -(void)getCameraScanInfoForCardData:(id)arg1 completionHandler:(/*^block*/id)arg2 ;
 -(void)getCarrierSetupWithCompletion:(/*^block*/id)arg1 ;
 -(CTCellularUsageWorkspaceInfo *)getCellularUsageWorkspaceInfo:(NSError **)error API_AVAILABLE(ios(17.0));
--(id)context:(id)arg1 getAttachApnSettings:(id*)arg2 ; // 返回nil
--(id)context:(id)arg1 modifyAttachApnSettings:(id)arg2 ;
--(void)context:(id)arg1 modifyAttachApnSettings:(id)arg2 completion:(/*^block*/id)arg3 ;
+-(id)context:(CTXPCServiceSubscriptionContext *)context getAttachApnSettings:(id*)arg2 ; // 返回nil
+-(id)context:(CTXPCServiceSubscriptionContext *)context modifyAttachApnSettings:(id)arg2 ;
+-(void)context:(CTXPCServiceSubscriptionContext *)context modifyAttachApnSettings:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(void)getConfiguredApns:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)isAttachApnSettingAllowed:(id)arg1 completion:(/*^block*/id)arg2 ;
--(BOOL)isAttachApnSettingAllowed:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error NS_SWIFT_NOTHROW; // 是否允许附加APN
+-(void)isAttachApnSettingAllowed:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL allowed, NSError *error))completion; // 是否允许附加APN 异步方法
+-(BOOL)isAttachApnSettingAllowed:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error NS_SWIFT_NOTHROW; // 是否允许附加APN 同步方法
 -(NSArray<NSDictionary *> *)getConfiguredApns:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error ; // 获取卡槽APN
 -(id)resetAPNSettings; // 重设 APN
 -(void)resetAPNSettings:(/*^block*/id)arg1 ;
@@ -374,16 +375,16 @@ typedef struct {
 -(NSString *)getCurrentRat:(CTServiceDescriptor *)descriptor error:(NSError **)error; // 返回当前用的网络制式
 -(void)getDataStatus:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(CTDataStatus *)getDataStatus:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 通过context 获取蜂窝网络的一些参数
--(CTDataStatus *)getInternetDataStatusSync:(NSError **)error API_AVAILABLE(ios(13.0)); // 直接获取蜂窝网络的一些参数
--(void)getInternetDataStatus:(/*^block*/id)arg1 ;
+-(CTDataStatus *)getInternetDataStatusSync:(NSError **)error API_AVAILABLE(ios(13.0)); // 直接获取蜂窝网络的一些参数 同步方法
+-(void)getInternetDataStatus:(void (^)(CTDataStatus *status, NSError *error))completion API_AVAILABLE(ios(13.0)); // 直接获取蜂窝网络的一些参数 异步方法
 -(void)getDataStatusBasic:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2 API_AVAILABLE(ios(15.4));
 -(CTDataStatusBasic *)getDataStatusBasic:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(15.4)); // 获取数据状态的基本信息 同步方法
--(void)getEOSFirmwareUpdateInfo:(/*^block*/id)arg1 ;
+-(void)getEosStatus:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0)); // 需要额外权利
+-(void)getEOSFirmwareUpdateInfo:(/*^block*/id)arg1 API_AVAILABLE(ios(17.0)); // 需要额外权利
 -(void)getEmergencyTextNumbers:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(NSArray *)getEmergencyTextNumbers:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取紧急呼叫电话号码列表
 -(id)getEncryptionStatus:(CTServiceDescriptor *)descriptor error:(id*)error ; // TODO 返回拒绝状态错误
--(void)getEnhancedVoiceLinkQualityMetric:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getEosStatus:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0)); // 需要额外权利
+-(void)getEnhancedVoiceLinkQualityMetric:(id)arg1 completion:(/*^block*/id)arg2 ; //TODO 返回CTEnhancedLinkQualityMetric
 -(id)getEvolvedSubscriptionLabelID:(NSString *)labelID error:(NSError **)error API_AVAILABLE(ios(16.0)); // 第一个参数不是context TODO
 -(void)getEvolvedSubscriptionLabelID:(NSString *)labelID withCallback:(/*^block*/id)arg2 API_AVAILABLE(ios(16.0));
 -(unsigned long long)getGSMAUIControlSetting:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(15.0)); // TODO 暂时不知道做什么的 返回0
@@ -534,21 +535,20 @@ typedef struct {
 -(void)isNetworkSelectionMenuAvailable:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(NSNumber *)isNetworkSelectionMenuAvailable:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error ; // 是否支持手动选网
 -(BOOL)isPrivateNetworkEvaluationNeeded:(NSError **)error API_AVAILABLE(ios(17.0));
--(void)isPrivateNetworkPreferredOverWifi:(id)arg1 completion:(/*^block*/id)arg2 ;
+-(void)isPrivateNetworkPreferredOverWifi:(id)arg1 completion:(void (^)(BOOL status, NSError *error))completion API_AVAILABLE(ios(16.0)); // TODO
 -(void)isPrivateNetworkSIM:(id)arg1 completion:(/*^block*/id)arg2 API_AVAILABLE(ios(16.0));
 -(BOOL)isPrivateNetworkSIM:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(16.0)) NS_SWIFT_NOTHROW; // 获取当前的SIM卡是否为私有网络的SIM卡
 -(id)isSimMatching:(id)arg1 carrierDescriptors:(id)arg2 error:(id*)arg3 ;
--(void)isUnconditionalCallForwardingActive:(id)arg1 completion:(/*^block*/id)arg2 ;
+-(void)isUnconditionalCallForwardingActive:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL status, NSError *error))completion;
 -(id)isVinylTapeSupportedWithError:(id*)error ; // TODO 需要额外权利
 -(void)isVinylTestModeEnabledWithCompletion:(/*^block*/id)arg1 ;
 -(NSArray<NSString *> *)listPersonalWallets:(NSError **)error; // 获取设备内存储的SIM卡ICCID列表
 -(id)loadGSMASettings:(CTXPCServiceSubscriptionContext *)context state:(BOOL)state API_AVAILABLE(ios(15.0)); // 返回nil
 -(NSNumber *)needToLaunchSetUpeSIM:(NSError **)error API_AVAILABLE(ios(16.0)); // 是否需要去设置eSIM
 -(void)performNetworkAccessFlowIfAllowed:(id)arg1 ignoreForeground:(BOOL)arg2 completion:(/*^block*/id)arg3 ;
--(void)plansPendingCrossPlatformTransferWithCompletion:(/*^block*/id)arg1 ;
+-(void)plansPendingCrossPlatformTransferWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(17.0));
 -(void)plansPendingInstallWithCompletion:(/*^block*/id)arg1 ;
 -(void)prepareCrossPlatformPlanTransfer:(id)arg1 completion:(/*^block*/id)arg2 ;
--(id)private_getActiveConnections:(id)arg1 error:(id*)arg2 ;
 -(id)private_getConnectionAvailability:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
 -(id)private_getConnectionState:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
 -(id)private_getDataStatus:(id)arg1 error:(id*)arg2 ;
@@ -717,6 +717,10 @@ typedef struct {
 - (void)activateCrossPlatformTransport:(unsigned long long)transport completion:(id /* block */)completion;
 - (void)activateTurboMode:(/* block */id)arg1 API_AVAILABLE(ios(18.3));
 - (id)isPrivateNetworkContext:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(18.0)); // iPad 7 蜂窝版测试提示设备不支持
+- (void)isPrivateNetworkContext:(CTXPCServiceSubscriptionContext *)context completion:(id /* block */)completion;
+- (void)prepareCrossPlatformCellularPlanLabel:(id)label completion:(id /* block */)completion;
+- (long long)checkCellularDiagnosticsStatus:(NSError **)error; // 检查蜂窝网络诊断状态
+- (void)context:(CTXPCServiceSubscriptionContext *)context resetPhoneNumber:(/*^block*/ id)completion API_AVAILABLE(ios(18.0)); // 闪退
 
 // iOS 26.0 头文件diff新增
 - (void)isTraveleSIM:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL isTravelESIM, NSError *error))completion API_AVAILABLE(ios(26.0)); // 是否为旅行时使用的eSIM卡

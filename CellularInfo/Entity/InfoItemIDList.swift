@@ -152,6 +152,7 @@ enum CoreTelephonyItemID {
     static let carrierBundlePath = 385
     static let activationTicket = 386
     static let travelEmbeddedSIM = 387
+    static let unconditionalCallForwarding = 388
 }
 
 // CellularPlan的ID
@@ -196,6 +197,7 @@ enum CoreTelephonyRAWItemID {
     static let emergencyModeInfo = 719
     static let GSMAUIControlSetting = 720
     static let brandedCallingInfo = 721
+    static let firmwareUpdateInfo = 722
 }
 
 // 设备信息的ID
@@ -282,5 +284,6 @@ enum SettingsItemID {
     static let versionCode = 22
     static let reference = 23
     static let githubLink = 24
-    static let trollSIMSwitcher = 25
+    static let havocLink = 25
+    static let trollSIMSwitcher = 26
 }

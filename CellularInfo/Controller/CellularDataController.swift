@@ -3823,6 +3823,25 @@ class CellularDataController {
         }
     }
     
+    /// 获取卡操作的卡是否开启无条件呼叫转移
+    func getSlotUnconditionalCallForwardingActive(context: CTXPCServiceSubscriptionContext) -> InfoItem {
+        do {
+            return InfoItem(
+                id: CoreTelephonyItemID.unconditionalCallForwarding,
+                text: String.localizedStringWithFormat(NSLocalizedString("UnconditionalCallForwarding", comment: ""), try coreTelephonyController.getSlotUnconditionalCallForwardingActive(context: context) ? NSLocalizedString("TurnOn", comment: "") : NSLocalizedString("TurnOff", comment: "")),
+                hintText: NSLocalizedString("UnconditionalCallForwardingHint", comment: ""),
+                isConfidential: false
+            )
+        } catch { // 无权限时抛异常
+            return InfoItem(
+                id: CoreTelephonyItemID.unconditionalCallForwarding,
+                text: String.localizedStringWithFormat(NSLocalizedString("UnconditionalCallForwarding", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                hintText: NSLocalizedString("UnconditionalCallForwardingHint", comment: ""),
+                isConfidential: false
+            )
+        }
+    }
+    
     /// 获取SIM卡是否允许使用PIN锁定
     /// iOS 14以下系统不支持
     func getSlotAllowSIMLockWithPIN(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
@@ -5219,6 +5238,28 @@ class CellularDataController {
         return nil
     }
     
+    /// 获取固件升级相关信息 原始数据
+    func getDeviceFirmwareUpdateInfo() -> InfoItem? {
+        if #available(iOS 17.0, *) {
+            do {
+                // 获取信息并且格式化输出 并且固定key顺序
+                let firmwareUpdateInfo = try coreTelephonyController.getDeviceFirmwareUpdateInfo().sorted { $0.key < $1.key }.map { "\($0.key): \($0.value)" }.joined(separator: "\n")
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.firmwareUpdateInfo,
+                    text: "Firmware Update Info: \n\(firmwareUpdateInfo)",
+                    isConfidential: false
+                )
+            } catch {
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.firmwareUpdateInfo,
+                    text: "Firmware Update Info: \(NSLocalizedString("NoPermission", comment: ""))",
+                    isConfidential: false
+                )
+            }
+        }
+        return nil
+    }
+    
     /// 获取设备基本信息 系统版本号
     func getDeviceBaseInfoGroup() -> InfoItemGroup {
         return InfoItemGroup(id: CellularDataItemGroupID.deviceBaseInfo, items: [getDeviceBasicInfo()])
@@ -5330,6 +5371,7 @@ class CellularDataController {
         deviceBaseUnderlyingInfoGroup.addItemIfPresent(getDeviceCellularUsageWorkspaceInfo()) // 蜂窝用量工作区信息
         deviceBaseUnderlyingInfoGroup.addItem(getDeviceSavedICCIDList()) // 已保存的SIM卡记录(ICCID)
         deviceBaseUnderlyingInfoGroup.addItemIfPresent(getDeviceShouldShowBrandedCallingInfo()) // 显示品牌信息
+        deviceBaseUnderlyingInfoGroup.addItemIfPresent(getDeviceFirmwareUpdateInfo()) // 固件升级信息
         
         return deviceBaseUnderlyingInfoGroup
     }
@@ -5469,6 +5511,7 @@ class CellularDataController {
                 slotConfigGroup.addItem(getSlotNetworkSelectionMode(context: context))
                 slotConfigGroup.addItem(getSlotNetworkSelectionMenuAvailable(context: context))
                 slotConfigGroup.addItemIfPresent(getSlotEnableDataRoaming(descriptor: descriptor))
+                slotConfigGroup.addItem(getSlotUnconditionalCallForwardingActive(context: context))
                 slotConfigGroup.addItemIfPresent(getSlotRoamingStatus(context: context))
                 slotConfigGroup.addItemIfPresent(getSlotLowDataMode(descriptor: descriptor))
                 slotConfigGroup.addItemIfPresent(getSlotLimitIPTrackingEnabled(descriptor: descriptor))

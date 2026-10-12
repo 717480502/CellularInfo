@@ -85,6 +85,7 @@ Related IPCC installation implementation:
 * Show eSIM Tips During Roaming
 * NR Status (5G SA & 5G NSA) **(Compatibility extended to iOS 14.0+ using an alternative method)**
 * Cellular Usage Workspace Info **(Underlying Data)**
+* Firmware Update Info **(Underlying Data)**
 
 ### 4. The following features require iOS 16.4 or later.
 >

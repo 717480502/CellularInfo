@@ -25,7 +25,8 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
         InfoItemGroup(id: SettingsGroupID.aboutApplication, titleText: NSLocalizedString("About", comment: ""), items: [
             InfoItem(id: SettingsItemID.versionCode, text: NSLocalizedString("Version", comment: "")),
             InfoItem(id: SettingsItemID.reference, text: NSLocalizedString("ReferenceAndAcknowledgements", comment: "")),
-            InfoItem(id: SettingsItemID.githubLink, text: "GitHub")
+            InfoItem(id: SettingsItemID.githubLink, text: "GitHub"),
+            InfoItem(id: SettingsItemID.havocLink, text: "Havoc"),
         ]),
         InfoItemGroup(id: SettingsGroupID.recommend, titleText: NSLocalizedString("Recommend", comment: ""), items: [
             InfoItem(id: SettingsItemID.trollSIMSwitcher, text: NSLocalizedString("TrollSIMSwitcherApp", comment: "")),
@@ -245,6 +246,8 @@ class SettingsViewController: UIViewController, UITableViewDelegate, UITableView
             }
         case SettingsItemID.githubLink:
             UIUtils.showAlertToUseDefaultBrowserOpenLink(URL: "https://github.com/DevelopCubeLab/CellularInfo", in: self)
+        case SettingsItemID.havocLink:
+            UIUtils.showAlertToUseDefaultBrowserOpenLink(URL: "https://havoc.app/package/cellularinfo", in: self)
         case SettingsItemID.reference:
             self.navigationController!.pushViewController(ReferenceAndAcknowledgementsViewController(), animated: true)
             
