@@ -11,7 +11,7 @@ before-all::
 
 # 使用 Xcode 项目构建
 XCODEPROJ_NAME = CellularInfo
-BUILD_VERSION = "1.1"
+BUILD_VERSION = "1.1.1"
 FILE_NAME = "com.developlab.cellularinfo"
 
 # 指定 Theos 使用 xcodeproj 规则
@@ -60,10 +60,10 @@ before-package::
 after-package::
 	@echo "Renaming .ipa to .tipa..."
 	@if [ -f ./packages/$(FILE_NAME)_$(BUILD_VERSION)+debug.ipa ]; then \
-		mv ./packages/$(FILE_NAME)_$(BUILD_VERSION)+debug.ipa ./packages/$(FILE_NAME)_$(BUILD_VERSION)+debug.tipa; \
+		mv ./packages/$(FILE_NAME)_$(BUILD_VERSION)+debug.ipa ./packages/$(XCODEPROJ_NAME)_$(BUILD_VERSION)+debug.tipa; \
 		echo "Renamed debug ipa to tipa."; \
 	elif [ -f ./packages/$(FILE_NAME)_$(BUILD_VERSION).ipa ]; then \
-		mv ./packages/$(FILE_NAME)_$(BUILD_VERSION).ipa ./packages/$(FILE_NAME)_$(BUILD_VERSION).tipa; \
+		mv ./packages/$(FILE_NAME)_$(BUILD_VERSION).ipa ./packages/$(XCODEPROJ_NAME)_$(BUILD_VERSION).tipa; \
 		echo "Renamed release ipa to tipa."; \
 	else \
 		echo "No .ipa file found."; \
