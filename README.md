@@ -94,6 +94,7 @@ Related IPCC installation implementation:
 ### 5. The following features require iOS 16.0 or later.
 * Device Supports eSIM **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * eSIM Only Device [(Verified to be compatible with iOS 12.0 or later based on device support data)](https://support.apple.com/en-us/111850)
+* Device Supports Satellite Communication [(Verified to be compatible with iOS 12.0 or later based on device support data)](https://support.apple.com/en-us/105097)
 * Current Connected Operator Name **(Compatibility extended to iOS 12.0+ using an alternative method)**
 * Device eSIM Health
 * Device Allowed Install Dev Signed IPCC (Carrier Budnle)

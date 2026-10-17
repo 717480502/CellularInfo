@@ -64,6 +64,7 @@ enum CoreTelephonyItemID {
     static let shouldShowEmbeddedSIMTravelTips = 230
     static let needToLaunchSetUpEmbeddedSIM = 231
     static let bootstrapDataService = 232
+    static let satelliteCommunicationSupport = 233
 
     static let slotLabel = 301
     static let SIMStatus = 302
@@ -153,6 +154,7 @@ enum CoreTelephonyItemID {
     static let activationTicket = 386
     static let travelEmbeddedSIM = 387
     static let unconditionalCallForwarding = 388
+    static let needReSelectionNetwork = 389
 }
 
 // CellularPlan的ID
@@ -198,6 +200,8 @@ enum CoreTelephonyRAWItemID {
     static let GSMAUIControlSetting = 720
     static let brandedCallingInfo = 721
     static let firmwareUpdateInfo = 722
+    static let priVersion = 723
+    static let enhancedVoiceLinkQualityMetric = 724
 }
 
 // 设备信息的ID

@@ -354,7 +354,7 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     
     /// 获取设备是否支持5G
     /// API本身仅支持iOS 14.0+
-    /// iOS 14 以下绝对不支持5G iPhone 12全系列出厂搭载iOS14.0系统 因此通过次即可判断
+    /// iOS 14 以下绝对不支持5G iPhone 12全系列出厂搭载iOS14.0系统 因此低系统可以直接判断
     /// @See https://support.apple.com/zh-cn/111850
     /// @See https://support.apple.com/en-us/111850
     /// API本身判断是否支持智能数据模式
@@ -515,6 +515,18 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
             throw error
         }
         return result
+    }
+    
+    /// 获取设备是否支持卫星通信
+    /// 不支持设备抛异常 错误代码 45
+    /// 无权限设备抛异常 错误代码 13
+    /// 需要最低iOS 16的设备才能判断 低于iOS 16的设备绝对不支持卫星通信
+    /// 该功能是iPhone 14 系列开始支持的 搭载的出厂系统版本为iOS 16.0
+    /// 使用LL/A的iPhone 14 Pro Max iOS 16.2测试可以正常返回CTStewieSupport
+    /// 使用LL/A的iPhone 13 Pro Max iOS 16.5测试抛异常 错误代码 45
+    @available(iOS 16.0, *)
+    func getDeviceSupportsSatelliteCommunication() throws -> CTStewieSupport {
+        return try coreTelephonyClient.getStewieSupport()
     }
     
     /// 获取NR的频率范围
@@ -1180,6 +1192,33 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     /// 返回true/false
     func getSlotNetworkSelectionMenuAvailable(context: CTXPCServiceSubscriptionContext) throws -> Bool {
         return try coreTelephonyClient.isNetworkSelectionMenuAvailable(context).boolValue
+    }
+    
+    /// 获取当前卡槽的卡是否需要重新选择网络
+    /// 无权限设备抛异常 错误代码 1 低版本系统 错误代码 13
+    /// 正在重启蜂窝网络服务 错误代码 22
+    func getSlotNeedReSelectionNetwork(context: CTXPCServiceSubscriptionContext) throws -> Bool {
+        var result: Bool = false
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.isNetworkReselectionNeeded(context) { needed, error in
+            
+            result = needed
+            finalError = error
+            
+            sema.signal()
+        }
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
     }
     
     /// 获取当前卡槽是否启用数据漫游
@@ -2487,6 +2526,63 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
         return result
     }
     
+    /// 获取当前卡槽的卡Pri版本
+    /// TODO 暂时不知道具体做什么的
+    /// 无权限设备抛异常 错误代码 13
+    func getSlotPriVersion(context: CTXPCServiceSubscriptionContext) throws -> CTPriVersion? {
+        
+        var result: CTPriVersion?
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.copyPriVersion(context, completion: { version, error in
+            result = version
+            finalError = error
+            
+            sema.signal()
+        })
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+        
+    }
+    
+    /// 获取当前卡槽的卡增强语音链路质量指标
+    /// 返回CTEnhancedLinkQualityMetric
+    /// TODO 不知道具体含义
+    /// 无权限设备抛异常 错误代码1
+    func getSlotEnhancedVoiceLinkQualityMetric(context: CTXPCServiceSubscriptionContext) throws -> CTEnhancedLinkQualityMetric? {
+        
+        var result: CTEnhancedLinkQualityMetric?
+        var finalError: Error?
+        
+        let sema = DispatchSemaphore(value: 0) // 创建一个信号量为 0 的锁
+        
+        coreTelephonyClient.getEnhancedVoiceLinkQualityMetric(context, completion: { status, error in
+            result = status
+            finalError = error
+            
+            sema.signal()
+        })
+        
+        sema.wait() // 挂起线程
+        
+        // 如果有错误就抛异常
+        if let error = finalError {
+            throw error
+        }
+        
+        return result
+        
+    }
+    
     /// 获取调制解调器固件版本
     func getDeviceModemFirmwareVersion() throws -> String? {
         
@@ -2614,6 +2710,33 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     @available(iOS 16.0, *)
     func fetchBasebandTicket(arg1: Bool) throws -> String {
         return String(describing: try coreTelephonyClient.fetchBasebandTicket(arg1))
+    }
+    
+    /// TODO 刷新没效果
+    /// 并不会刷新SIM卡状态 可能和SIM卡应用程序的功能相关
+    func simRefresh(slotID: Int) -> Int32 {
+        return _CTServerConnectionSimRefresh(connection, Int64(slotID))
+    }
+    
+    /// 获取是否需要验证Carrier Bundles
+    /// 无权限设备调用会导致App闪退 因此必须需要先判断SPI权利
+    /// 配置文件在/var/wireless/Library/Preferences/com.apple.commcenter.plist -> VerifyBundles
+    /// TODO
+    func getVerifyCarrierBundles() -> Bool? {
+        if AppCapability.hasCommCenterSPI() {
+            return CTSettingCopyVerifyCarrierBundles()
+        } else {
+            return nil
+        }
+    }
+    
+    /// 设置是否需要验证Carrier Bundles
+    /// 返回值为0时则说明设置成功
+    /// 返回值!=0时则为失败
+    /// 关闭验证后仍然不允许刷入未经验证的IPCC
+    /// TODO
+    func setVerifyCarrierBundles(enable: Bool) -> Bool {
+        return CTSettingSetVerifyCarrierBundles(enable) == 0
     }
     
 }

@@ -44,8 +44,10 @@ class CellularDataController {
         } else { // 没有获取到再用MGDevice的
             IMEICount =  deviceInfoController.getIMEICount()
         }
-        
+        // 获取设备是否支持蜂窝网络
         self.deviceSupportsCellular = coreTelephonyController.getDeviceSupportsCellular()
+        // 获取设备设备类型
+        self.deviceTypeBaseBand = getDeviceType()
         
         // 监听 CoreTelephony 数据变化
         coreTelephonyController.onDataUpdated = { [weak self] in
@@ -463,6 +465,41 @@ class CellularDataController {
                     text: String.localizedStringWithFormat(NSLocalizedString("DynamicDataSimSwitchOnCall", comment: ""), NSLocalizedString("NoPermission", comment: ""))
                 )
             }
+        }
+    }
+    
+    /// 获取设备是否支持卫星通信
+    private func getDeviceSupportsSatelliteCommunication() -> InfoItem {
+        if #available(iOS 16.0, *) {
+            do {
+                let satelliteSupportsStatus = try coreTelephonyController.getDeviceSupportsSatelliteCommunication()
+                return InfoItem(
+                    id: CoreTelephonyItemID.satelliteCommunicationSupport,
+                    text: String.localizedStringWithFormat(NSLocalizedString("SatelliteCommunicationSupport", comment: ""), satelliteSupportsStatus.hwSupport ? NSLocalizedString("Supported", comment: "") : NSLocalizedString("NotSupported", comment: ""))
+                )
+            } catch let error as NSError {
+                if error.code == 45 { // 设备不支持
+                    return InfoItem(
+                        id: CoreTelephonyItemID.satelliteCommunicationSupport,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SatelliteCommunicationSupport", comment: ""), NSLocalizedString("DeviceNotSupported", comment: ""))
+                    )
+                } else if error.code == 13 { // 无权限
+                    return InfoItem(
+                        id: CoreTelephonyItemID.satelliteCommunicationSupport,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SatelliteCommunicationSupport", comment: ""), NSLocalizedString("NoPermission", comment: ""))
+                    )
+                } else { // 其他情况
+                    return InfoItem(
+                        id: CoreTelephonyItemID.satelliteCommunicationSupport,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SatelliteCommunicationSupport", comment: ""), String.localizedStringWithFormat(NSLocalizedString("UnknownWithError", comment: ""), "\(error.code) \(error.localizedDescription)"))
+                    )
+                }
+            }
+        } else { // 低版本系统肯定不支持
+            return InfoItem(
+                id: CoreTelephonyItemID.satelliteCommunicationSupport,
+                text: String.localizedStringWithFormat(NSLocalizedString("SatelliteCommunicationSupport", comment: ""), NSLocalizedString("DeviceNotSupported", comment: ""))
+            )
         }
     }
     
@@ -3278,6 +3315,40 @@ class CellularDataController {
         }
     }
     
+    /// 获取当前卡槽的卡是否需要重新选择网络
+    func getSlotNeedReSelectionNetwork(context: CTXPCServiceSubscriptionContext) -> InfoItem {
+        
+        do {
+            let result = try coreTelephonyController.getSlotNeedReSelectionNetwork(context: context)
+            return InfoItem(
+                id: CoreTelephonyItemID.needReSelectionNetwork,
+                text: String.localizedStringWithFormat(NSLocalizedString("NetworkReselectionRequired", comment: ""), result ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: "")),
+                isConfidential: false
+            )
+        } catch let error as NSError {
+            if error.code == 1 || error.code == 13 { // 无权限
+                return InfoItem(
+                    id: CoreTelephonyItemID.needReSelectionNetwork,
+                    text: String.localizedStringWithFormat(NSLocalizedString("NetworkReselectionRequired", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                    isConfidential: false
+                )
+            } else if error.code == 22 { // 正在重启蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.needReSelectionNetwork,
+                    text: String.localizedStringWithFormat(NSLocalizedString("NetworkReselectionRequired", comment: ""), NSLocalizedString("Checking", comment: "")),
+                    isConfidential: false
+                )
+            } else { // 其他情况
+                return InfoItem(
+                    id: CoreTelephonyItemID.needReSelectionNetwork,
+                    text: String.localizedStringWithFormat(NSLocalizedString("NetworkReselectionRequired", comment: ""), String.localizedStringWithFormat(NSLocalizedString("UnknownWithError", comment: ""), "\(error.code) \(error.localizedDescription)")),
+                    isConfidential: false
+                )
+            }
+            
+        }
+    }
+    
     /// 获取当前卡槽用户是否启用数据漫游
     func getSlotEnableDataRoaming(descriptor: CTServiceDescriptor) -> InfoItem? {
         if #available(iOS 13.4, *) {
@@ -4979,6 +5050,58 @@ class CellularDataController {
         }
     }
     
+    /// 获取卡槽的卡Pri版本信息 原始数据
+    func getSlotPriVersion(context: CTXPCServiceSubscriptionContext) -> InfoItem {
+        do {
+            if let priVersion = try coreTelephonyController.getSlotPriVersion(context: context) {
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.priVersion,
+                    text: String.localizedStringWithFormat(NSLocalizedString("PriVersion", comment: ""), String(describing: priVersion)),
+                    isConfidential: false
+                )
+            } else {
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.priVersion,
+                    text: String.localizedStringWithFormat(NSLocalizedString("PriVersion", comment: ""), NSLocalizedString("Unknown", comment: "未知")),
+                    isConfidential: false
+                )
+            }
+        } catch let error as NSError {
+            if error.code == 13 {
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.priVersion,
+                    text: String.localizedStringWithFormat(NSLocalizedString("PriVersion", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                    isConfidential: false
+                )
+            } else {
+                return InfoItem(
+                    id: CoreTelephonyRAWItemID.priVersion,
+                    text: String.localizedStringWithFormat(NSLocalizedString("PriVersion", comment: ""), String.localizedStringWithFormat(NSLocalizedString("ErrorWithCodeReason", comment: ""), error.code ,error.localizedDescription)),
+                    isConfidential: false
+                )
+            }
+        }
+    }
+    
+    /// 获取当前卡槽的卡增强语音链路质量指标
+    func getSlotEnhancedVoiceLinkQualityMetric(context: CTXPCServiceSubscriptionContext) -> InfoItem {
+        
+        do {
+            let enhancedVoiceLinkQualityMetric = try coreTelephonyController.getSlotEnhancedVoiceLinkQualityMetric(context: context)
+            return InfoItem(
+                id: CoreTelephonyRAWItemID.enhancedVoiceLinkQualityMetric,
+                text: String.localizedStringWithFormat(NSLocalizedString("EnhancedVoiceLinkQualityMetric", comment: ""), String(describing: enhancedVoiceLinkQualityMetric)),
+                isConfidential: false
+            )
+        } catch {
+            return InfoItem(
+                id: CoreTelephonyRAWItemID.enhancedVoiceLinkQualityMetric,
+                text: String.localizedStringWithFormat(NSLocalizedString("EnhancedVoiceLinkQualityMetric", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                isConfidential: false
+            )
+        }
+    }
+    
     /// 获取设备基本信息 原始数据
     func getDeviceInfoList() -> InfoItem {
         do {
@@ -5279,6 +5402,7 @@ class CellularDataController {
         if coreTelephonyController.getDeviceSupportsCellular() {  // 只有设备支持蜂窝网络才加载这些数据，否则没啥意义
             deviceBaseInfoGroup.addItemIfPresent(getDeviceCarrierLockState())
             deviceBaseInfoGroup.addItem(getDeviceSupports5G())
+            deviceBaseInfoGroup.addItem(getDeviceSupportsSatelliteCommunication())
             deviceBaseInfoGroup.addItem(getDualSimCapability())
             deviceBaseInfoGroup.addItem(getSupportsEmbeddedSIM())
 //            deviceBaseInfoGroup.addItem(getAllowInstallEmbeddedSIM())
@@ -5447,6 +5571,7 @@ class CellularDataController {
                 if experimentalFeatures {
                     slotNetworkInfoGroup.addItems(getSlotRatSectionInfo(descriptor: descriptor, context: context))
                 }
+                slotNetworkInfoGroup.addItem(getSlotNeedReSelectionNetwork(context: context))
                 slotNetworkInfoGroup.addItem(getSlotUseHomeNetworkPolicy(context: context))
                 slotNetworkInfoGroup.addItemIfPresent(getSlotPLMNInfo(context: context))
                 slotNetworkInfoGroup.addItem(getSlotServingMCCInfo(context: context))
@@ -5607,6 +5732,8 @@ class CellularDataController {
             slotUnderlyingInfoGroup.addItem(getSlotMobileEquipmentInfo(context: context)) // 获取设备信息 原始数据
             slotUnderlyingInfoGroup.addItem(getSlotSystemCapabilities(context: context)) // 获取当前卡槽的系统能力 原始数据
             slotUnderlyingInfoGroup.addItem(getSlotPNRInfo(context: context)) // 获取卡的PNR状态 原始数据
+            slotUnderlyingInfoGroup.addItem(getSlotPriVersion(context: context)) // 获取当前卡槽的卡Pri版本信息
+            slotUnderlyingInfoGroup.addItem(getSlotEnhancedVoiceLinkQualityMetric(context: context)) // 获取当前卡槽的卡增强语音链路质量指标
 //            slotUnderlyingInfoGroup.addItemIfPresent(getSlotBandInfoRAW(context: context)) // 获取设备频段信息 原始数据
             slotUnderlyingInfoGroup.addItemIfPresent(getSlotNRStatusInfo(descriptor: descriptor)) // 卡槽的卡5G NR禁用状态 原始数据
             slotUnderlyingInfoGroup.addItemIfPresent(getSlotGSMAUIControlSetting(context: context)) // GSMA UI Control Setting

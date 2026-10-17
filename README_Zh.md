@@ -84,6 +84,7 @@
 >
 * 设备是否支持eSIM **(已使用备用方法兼容至iOS 12.0+)**
 * 设备仅支持eSIM [(已使用设备支持情况兼容至iOS 12.0+)](https://support.apple.com/zh-cn/111850)
+* 设备是否支持卫星网络 [(已使用设备支持情况兼容至iOS 12.0+)](https://support.apple.com/zh-cn/105097)
 * 当前连接的网络名称 **(已使用备用方法兼容至iOS 12.0+)**
 * 设备eSIM 健康状况
 * 设备允许安装开发签名的IPCC (Carrier Bundle)

@@ -44,6 +44,9 @@
 #import "CTCellularUsageWorkspaceInfo.h"
 #import "CTBundle.h"
 #import "CTRoamingStatus.h"
+#import "CTStewieSupport.h"
+#import "CTEnhancedLinkQualityMetric.h"
+#import "CTPriVersion.h"
 
 @class CoreTelephonyClientMux;
 
@@ -98,7 +101,7 @@ typedef struct {
 - (NSNumber *)isAnySimReadyWithError:(NSError **)error API_AVAILABLE(ios(16.4)); // 是否有SIM卡准备完毕 无需额外权利
 -(void)getSIMTrayStatus:(/*^block*/id)arg1; // 获取SIM卡槽状态 异步方法
 - (NSString *)getSIMTrayStatusOrError:(NSError **)error; // 获取SIM卡槽状态 同步方法
--(void)copyPriVersion:(id)arg1 completion:(/*^block*/id)arg2 ; // TODO 获取PRI信息 CDMA的东西 返回的是nil
+-(void)copyPriVersion:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(CTPriVersion *version, NSError *error))completion; // 获取PRI版本信息 具体做什么的暂时不知道
 //-(_CTAssertionType*)createCTAssertionForConnectionType:(int)arg1 allocator:(CFAllocatorRef)arg2 proxy:(id)arg3 ;
 -(CTServiceDescriptorContainer *)getDescriptorsForDomain:(long long)domain error:(id*)error; // 通过domain获取CTServiceDescriptorContainer
 -(void)getDescriptorsForDomain:(long long)arg1 completion:(/*^block*/id)arg2 ;
@@ -229,7 +232,8 @@ typedef struct {
 -(void)copyRejectCauseCode:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2;
 -(NSNumber *)getRejectCauseCode:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 被网络拒绝的原因代码
 -(void)getRadioPersonality:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2;
--(void)getStewieSupportWithCompletion:(/*^block*/id)arg1 ;
+-(CTStewieSupport *)getStewieSupport:(NSError **)error API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 同步方法
+-(void)getStewieSupportWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 异步方法
 -(void)getTransferPlansWithCompletion:(/*^block*/id)arg1 ;
 -(BOOL)isDedicatedBearerPresent:(id)arg1 error:(id*)arg2 ;
 -(void)refreshSweetgumApps:(id)arg1 completion:(/*^block*/id)arg2 ;
@@ -269,8 +273,8 @@ typedef struct {
 -(void)context:(CTXPCServiceSubscriptionContext *)context getPhoneNumberSignatureWithCompletion:(/*^block*/id)arg2 ; // 返回 错误代码 2 no such file
 -(void)context:(CTXPCServiceSubscriptionContext *)context getPseudoIdentityFor:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(id)context:(CTXPCServiceSubscriptionContext *)context getPseudoIdentityFor:(NSString *)identity error:(id*)error API_AVAILABLE(ios(13.0)); // TODO
-- (NSDictionary<NSString *, id> *)context:(CTXPCServiceSubscriptionContext *)context getSystemCapabilities:(NSError **)error NS_SWIFT_NOTHROW; // 获取系统能力
--(void)context:(CTXPCServiceSubscriptionContext *)context getSystemCapabilitiesWithCompletion:(/*^block*/id)arg2 ;
+- (NSDictionary<NSString *, id> *)context:(CTXPCServiceSubscriptionContext *)context getSystemCapabilities:(NSError **)error NS_SWIFT_NOTHROW; // 获取系统能力 同步方法
+-(void)context:(CTXPCServiceSubscriptionContext *)context getSystemCapabilitiesWithCompletion:(/*^block*/id)arg2 ; // 获取系统能力 异步方法
 -(BOOL)context:(CTXPCServiceSubscriptionContext *)context isMandatoryDisabledVoLTE:(NSError **)error API_AVAILABLE(ios(14.0)) NS_SWIFT_NOTHROW; // 获取是否强制禁用VoLTE
 -(void)context:(CTXPCServiceSubscriptionContext *)context isProtectedIdentitySupported:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(BOOL)context:(CTXPCServiceSubscriptionContext *)context isProtectedIdentitySupported:(id)arg2 error:(NSError **)error;
@@ -364,14 +368,14 @@ typedef struct {
 -(void)resetUIConfiguredApns:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)getConnectionAssistantConfig:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0));
 -(id)getConnectionAssistantConfigWithError:(id*)arg1 API_AVAILABLE(ios(16.0)); // TODO 返回 错误45
--(void)getConnectionAssistantServicePlot:(/*^block*/id)arg1 ;
+-(void)getConnectionAssistantServicePlot:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0));
 -(id)getConnectionAssistantServicePlotWithError:(id*)arg1 API_AVAILABLE(ios(16.0)); // 需要 connection-assistant 权利 返回 错误 45
--(void)getConnectionAssistantState:(/*^block*/id)arg1 ;
--(id)getConnectionAssistantStateWithError:(id*)arg1 ; // TODO 返回 错误45
--(void)getConnectionAvailability:(id)arg1 connectionType:(int)arg2 completion:(/*^block*/id)arg3 ;
--(id)getConnectionAvailability:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
--(void)getConnectionState:(id)arg1 connectionType:(int)arg2 completion:(/*^block*/id)arg3 ;
--(id)getConnectionState:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
+-(void)getConnectionAssistantState:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0));
+-(id)getConnectionAssistantStateWithError:(NSError **)error API_AVAILABLE(ios(16.0)); // TODO 返回 错误45
+-(void)getConnectionAvailability:(CTXPCServiceSubscriptionContext *)context connectionType:(int)connectionType completion:(/*^block*/id)arg3 ;
+-(CTDataConnectionAvailabilityStatus *)getConnectionAvailability:(CTXPCServiceSubscriptionContext *)context connectionType:(int)connectionType error:(NSError **)error ;
+-(void)getConnectionState:(CTXPCServiceSubscriptionContext *)context connectionType:(int)connectionType completion:(/*^block*/id)arg3 ;
+-(CTDataConnectionStatus *)getConnectionState:(CTXPCServiceSubscriptionContext *)context connectionType:(int)connectionType error:(NSError **)error API_AVAILABLE(ios(13.0));
 -(NSString *)getCurrentRat:(CTServiceDescriptor *)descriptor error:(NSError **)error; // 返回当前用的网络制式
 -(void)getDataStatus:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(CTDataStatus *)getDataStatus:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 通过context 获取蜂窝网络的一些参数
@@ -384,7 +388,7 @@ typedef struct {
 -(void)getEmergencyTextNumbers:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(NSArray *)getEmergencyTextNumbers:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(13.0)); // 获取紧急呼叫电话号码列表
 -(id)getEncryptionStatus:(CTServiceDescriptor *)descriptor error:(id*)error ; // TODO 返回拒绝状态错误
--(void)getEnhancedVoiceLinkQualityMetric:(id)arg1 completion:(/*^block*/id)arg2 ; //TODO 返回CTEnhancedLinkQualityMetric
+-(void)getEnhancedVoiceLinkQualityMetric:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(CTEnhancedLinkQualityMetric *status, NSError *error))completion; // 返回CTEnhancedLinkQualityMetric
 -(id)getEvolvedSubscriptionLabelID:(NSString *)labelID error:(NSError **)error API_AVAILABLE(ios(16.0)); // 第一个参数不是context TODO
 -(void)getEvolvedSubscriptionLabelID:(NSString *)labelID withCallback:(/*^block*/id)arg2 API_AVAILABLE(ios(16.0));
 -(unsigned long long)getGSMAUIControlSetting:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error API_AVAILABLE(ios(15.0)); // TODO 暂时不知道做什么的 返回0
@@ -485,13 +489,12 @@ typedef struct {
 -(NSNumber *)getSmsReadyState:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取短信是否就绪
 -(void)getSmscAddress:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2 ;
 -(NSString *)getSmscAddress:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取短信中心号码
--(id)getStewieSupport:(NSError **)error API_AVAILABLE(ios(16.0)); // 返回不支持
--(void)getSweetgumApps:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getSweetgumCapabilities:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getSweetgumDataPlanMetrics:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getSweetgumPlans:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getSweetgumUsage:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)getSweetgumUserConsentInfo:(id)arg1 completion:(/*^block*/id)arg2 ;
+-(void)getSweetgumApps:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ; // 返回CTSweetgumError Code=6
+-(void)getSweetgumCapabilities:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ;
+-(void)getSweetgumDataPlanMetrics:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ;
+-(void)getSweetgumPlans:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ; // 返回CTSweetgumError Code=6
+-(void)getSweetgumUsage:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ; // 返回CTSweetgumError Code=6
+-(void)getSweetgumUserConsentInfo:(CTServiceDescriptor *)descriptor completion:(/*^block*/id)arg2 ;  // 返回CTSweetgumError Code=2
 -(void)getTransferPlanListWithCompletion:(/*^block*/id)arg1 ;
 -(void)getTransferType:(id)arg1 remoteEid:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(id)getTransportKeysToUpdate:(id*)arg1 ; // 返回不支持
@@ -518,10 +521,10 @@ typedef struct {
 -(BOOL)isAnyPlanTransferableFromThisDeviceOrError:(NSError **)error API_AVAILABLE(ios(13.0)) NS_SWIFT_NOTHROW;
 -(void)getAllEmergencyNumbers:(/*^block*/id)arg1;
 -(NSArray<NSString *> *)getAllEmergencyNumbersWithError:(NSError **)error API_AVAILABLE(ios(16.0)); // 获取紧急呼叫号码列表
--(void)isEmergencyNumber:(id)arg1 number:(id)arg2 completion:(/*^block*/id)arg3 ;
--(void)isEmergencyNumberWithWhitelistIncluded:(id)arg1 number:(id)arg2 completion:(/*^block*/id)arg3 ;
--(BOOL)isEmergencyNumberWithWhitelistIncluded:(id)arg1 number:(id)arg2 error:(id*)arg3 ;
--(BOOL)isEmergencyNumber:(CTXPCServiceSubscriptionContext *)context number:(id)arg2 error:(id*)error ;
+-(void)isEmergencyNumber:(CTXPCServiceSubscriptionContext *)context number:(NSString *)number completion:(void (^)(BOOL result, NSError *error))completion; // 当前号码是否为紧急呼叫号码 异步方法
+-(BOOL)isEmergencyNumber:(CTXPCServiceSubscriptionContext *)context number:(NSString *)number error:(NSError **)error ; // 当前号码是否为紧急呼叫号码 同步方法
+-(void)isEmergencyNumberWithWhitelistIncluded:(CTXPCServiceSubscriptionContext *)context number:(NSString *)number completion:(/*^block*/id)arg3 ;
+-(BOOL)isEmergencyNumberWithWhitelistIncluded:(CTXPCServiceSubscriptionContext *)context number:(NSString *)number error:(NSError **)error;
 -(long long)isEsimFor:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 获取卡槽中的卡类型
 -(NSNumber *)getDataMode:(CTServiceDescriptor *)descriptor error:(NSError **)error ; // 获取当前的蜂窝网络类型的索引 不是设置低数据模式的数据模式 返回数字
 -(BOOL)isHighDataModeSupported:(CTServiceDescriptor *)descriptor error:(NSError **)error API_AVAILABLE(ios(14.0)) NS_SWIFT_NOTHROW; // 是否支持高数据模式 自动5G 就是5G允许更多数据
@@ -531,9 +534,9 @@ typedef struct {
 -(id)setLowDataMode:(id)arg1 enable:(BOOL)arg2 API_AVAILABLE(ios(14.0));
 -(BOOL)saveDataMode:(CTServiceDescriptor *)descriptor error:(NSError **)error API_AVAILABLE(ios(13.0)) NS_SWIFT_NOTHROW; // 获取低数据模式 iOS 13开始有的接口 跟lowDataMode一样
 -(id)setSaveDataMode:(CTXPCServiceSubscriptionContext *) context enable:(BOOL)enable API_AVAILABLE(ios(13.0));
--(void)isNetworkReselectionNeeded:(id)arg1 completion:(/*^block*/id)arg2 ;
--(void)isNetworkSelectionMenuAvailable:(id)arg1 completion:(/*^block*/id)arg2 ;
--(NSNumber *)isNetworkSelectionMenuAvailable:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error ; // 是否支持手动选网
+-(void)isNetworkReselectionNeeded:(CTXPCServiceSubscriptionContext *)context completion:(void (^)(BOOL result, NSError *error))completion; // 是否需要重新选择网络
+-(void)isNetworkSelectionMenuAvailable:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2 ; // 是否支持手动选网 异步方法
+-(NSNumber *)isNetworkSelectionMenuAvailable:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error ; // 是否支持手动选网 同步方法
 -(BOOL)isPrivateNetworkEvaluationNeeded:(NSError **)error API_AVAILABLE(ios(17.0));
 -(void)isPrivateNetworkPreferredOverWifi:(id)arg1 completion:(void (^)(BOOL status, NSError *error))completion API_AVAILABLE(ios(16.0)); // TODO
 -(void)isPrivateNetworkSIM:(id)arg1 completion:(/*^block*/id)arg2 API_AVAILABLE(ios(16.0));
@@ -547,7 +550,7 @@ typedef struct {
 -(NSNumber *)needToLaunchSetUpeSIM:(NSError **)error API_AVAILABLE(ios(16.0)); // 是否需要去设置eSIM
 -(void)performNetworkAccessFlowIfAllowed:(id)arg1 ignoreForeground:(BOOL)arg2 completion:(/*^block*/id)arg3 ;
 -(void)plansPendingCrossPlatformTransferWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(17.0));
--(void)plansPendingInstallWithCompletion:(/*^block*/id)arg1 ;
+-(void)plansPendingInstallWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(13.0));
 -(void)prepareCrossPlatformPlanTransfer:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(id)private_getConnectionAvailability:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
 -(id)private_getConnectionState:(id)arg1 connectionType:(int)arg2 error:(id*)arg3 ;
@@ -750,6 +753,9 @@ extern int _CTServerConnectionGetCellularDataIsEnabled(CTServerConnectionRef con
 extern int _CTServerConnectionSetCellularDataIsEnabled(CTServerConnectionRef connection, uint8_t enabled); // 设置蜂窝数据是否开启
 extern int _CTServerConnectionDebugResetSim(CTServerConnectionRef connection); // 重置SIM卡状态 日志报错 #N no controller to send debug sim reset
 extern int _CTServerConnectionFetchTimeFromNetwork(CTServerConnectionRef connection, int32_t requestType, int32_t *result); // 获取数据无效
+extern int _CTServerConnectionSimRefresh(CTServerConnectionRef connection, int64_t slotIdentifier); // 没效果 并不会刷新SIM卡状态 可能和SIM卡应用程序的功能相关
+extern int CTSettingSetVerifyCarrierBundles(BOOL enabled); // 设置是否验证Carrier Bundle签名 修改后刷入无效IPCC仍然不被允许
+extern BOOL CTSettingCopyVerifyCarrierBundles(void); // 获取是否验证Carrier Bundle签名 无权限设备访问会导致App闪退
 
 @end
 

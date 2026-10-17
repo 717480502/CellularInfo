@@ -338,6 +338,21 @@ static NSInteger CTDebugBlockArgCount = 2; // 默认2个参数
             [inv setArgument:&v atIndex:(NSInteger)i + 2];
             continue;
         }
+        if (argType[0] == 's') {
+            short v = [obj respondsToSelector:@selector(intValue)] ? (short)[obj intValue] : 0;
+            [inv setArgument:&v atIndex:(NSInteger)i + 2];
+            continue;
+        }
+        if (argType[0] == 'l') {
+            long v = [obj respondsToSelector:@selector(longValue)] ? [obj longValue] : 0;
+            [inv setArgument:&v atIndex:(NSInteger)i + 2];
+            continue;
+        }
+        if (argType[0] == 'L') {
+            unsigned long v = [obj respondsToSelector:@selector(unsignedLongValue)] ? [obj unsignedLongValue] : 0;
+            [inv setArgument:&v atIndex:(NSInteger)i + 2];
+            continue;
+        }
         if (argType[0] == 'q') {
             long long v = [obj respondsToSelector:@selector(longLongValue)] ? [obj longLongValue] : 0;
             [inv setArgument:&v atIndex:(NSInteger)i + 2];
@@ -493,6 +508,8 @@ typedef NS_ENUM(NSInteger, CTArgTemplate) {
 @property(nonatomic, strong) CTCellularPlanManager *planManager;
 @property(nonatomic, strong) UISegmentedControl *frameworkControl;
 
+@property(nonatomic, strong) UITextField *extraArgField;
+
 @property(nonatomic, strong) UITextField *selectorField;
 @property(nonatomic, strong) UISegmentedControl *templateControl;
 @property(nonatomic, strong) UISegmentedControl *blockArgControl;
@@ -589,6 +606,27 @@ typedef NS_ENUM(NSInteger, CTArgTemplate) {
     self.templateControl.selectedSegmentIndex = CTArgTemplate_Context_Error;
     [stack addArrangedSubview:self.templateControl];
 
+    UIStackView *extraArgRow = [[UIStackView alloc] initWithFrame:CGRectZero];
+    extraArgRow.axis = UILayoutConstraintAxisHorizontal;
+    extraArgRow.spacing = 8;
+    extraArgRow.alignment = UIStackViewAlignmentFill;
+
+    UILabel *extraArgLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    extraArgLabel.text = @"Extra Arg";
+    extraArgLabel.font = [UIFont systemFontOfSize:14];
+    [extraArgLabel.widthAnchor constraintEqualToConstant:75].active = YES;
+    [extraArgRow addArrangedSubview:extraArgLabel];
+
+    self.extraArgField = [[UITextField alloc] initWithFrame:CGRectZero];
+    self.extraArgField.placeholder = @"Optional: 1 / YES / NSString";
+    self.extraArgField.borderStyle = UITextBorderStyleRoundedRect;
+    self.extraArgField.autocorrectionType = UITextAutocorrectionTypeNo;
+    self.extraArgField.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    self.extraArgField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    [extraArgRow addArrangedSubview:self.extraArgField];
+
+    [stack addArrangedSubview:extraArgRow];
+    
     self.blockArgControl = [[UISegmentedControl alloc] initWithItems:@[
         @"Block1",
         @"Block2",
@@ -799,7 +837,11 @@ typedef NS_ENUM(NSInteger, CTArgTemplate) {
             if (realArgCount == 2 && secondArgIsBlock) {
                 // fetchPhonebook:completion: style
                 args = @[ (contextObj ?: [NSNull null]), [NSNull null] ];
-                outErrIndex = -1; // no NSError**
+                outErrIndex = -1;
+            } else if (realArgCount == 3) {
+                NSString *extraArg = [self.extraArgField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                args = @[ (contextObj ?: [NSNull null]), (extraArg.length ? extraArg : @0), [NSNull null] ];
+                outErrIndex = 2;
             } else {
                 args = @[ (contextObj ?: [NSNull null]), [NSNull null] ];
                 outErrIndex = 1;
@@ -829,6 +871,11 @@ typedef NS_ENUM(NSInteger, CTArgTemplate) {
 
     [self appendLine:@"\n====================" ];
     [self appendLine:[NSString stringWithFormat:@"Selector: %@", sel]];
+    
+    NSString *extraArg = [self.extraArgField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (extraArg.length > 0) {
+        [self appendLine:[NSString stringWithFormat:@"Extra Arg: input=\"%@\", inputType=NSString, inputValue=%@", extraArg, extraArg]];
+    }
 
     CTInvokeResult *r = [CTMethodRunner invokeTarget:target
                                             selector:sel
@@ -851,9 +898,9 @@ typedef NS_ENUM(NSInteger, CTArgTemplate) {
     [self appendLine:[NSString stringWithFormat:@"Elapsed: %.3f ms", r.elapsedMs]];
 
     if (r.error) {
-        [self appendLine:[NSString stringWithFormat:@"NSError**: %@ (domain=%@ code=%ld)", r.error, r.error.domain, (long)r.error.code]];
+        [self appendLine:[NSString stringWithFormat:@"NSError**: %@ (domain=%@ code=%ld)\n=====End=====", r.error, r.error.domain, (long)r.error.code]];
     } else {
-        [self appendLine:@"NSError**: (nil)" ];
+        [self appendLine:@"NSError**: (nil)\n=====End=====" ];
     }
 
     if (r.log.length) {

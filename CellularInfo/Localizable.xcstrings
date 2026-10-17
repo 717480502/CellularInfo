@@ -2770,6 +2770,22 @@
         }
       }
     },
+    "EnhancedVoiceLinkQualityMetric" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enhanced Voice Link Quality Metric: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "增强的语音链路质量指标: %@"
+          }
+        }
+      }
+    },
     "ErrorWithCodeReason" : {
       "localizations" : {
         "en" : {
@@ -4530,6 +4546,22 @@
         }
       }
     },
+    "NetworkReselectionRequired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Network Reselection Required: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要重新选择网络: %@"
+          }
+        }
+      }
+    },
     "NetworkSelectionInfo" : {
       "localizations" : {
         "en" : {
@@ -5682,6 +5714,22 @@
         }
       }
     },
+    "PriVersion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri Version: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pri版本: %@"
+          }
+        }
+      }
+    },
     "ProvideCoreTelephonyHeadFile" : {
       "localizations" : {
         "en" : {
@@ -6548,6 +6596,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "运行兼容性检测"
+          }
+        }
+      }
+    },
+    "SatelliteCommunicationSupport" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite Communication Support: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卫星通信: %@"
           }
         }
       }

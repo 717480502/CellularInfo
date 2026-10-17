@@ -41,6 +41,8 @@
 #import "Head/CTQoS.h"
 #import "Head/CTEmergencyModeResult.h"
 #import "Head/CTCellularUsageWorkspaceInfo.h"
+#import "Head/CTStewieSupport.h"
+#import "Head/CTPriVersion.h"
 #import "Head/CTBundle.h"
 //#import "Head/CTCarrier.h"
 #import "Head/CTCellularPlanManager.h"
