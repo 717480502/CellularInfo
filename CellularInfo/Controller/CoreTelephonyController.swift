@@ -1759,6 +1759,8 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     /// 包含RSRP信息的 CTSignalStrengthMeasurements 实例
     /// 包含RSRP和SNR
     /// 返回值可以为nil
+    /// 无权限设备抛异常 错误代码 1 低版本系统 错误代码 13
+    /// iPad 蜂窝版关闭蜂窝数据重启设备后 抛异常 错误代码 0
     @available(iOS 13.0, *)
     func getSlotSignalStrengthMeasurements(descriptor: CTServiceDescriptor) throws -> CTSignalStrengthMeasurements? {
         return try coreTelephonyClient.getSignalStrengthMeasurements(descriptor)

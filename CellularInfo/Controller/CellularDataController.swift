@@ -206,6 +206,39 @@ class CellularDataController {
         }
     }
     
+    /// 获取是否为iPad蜂窝版并且蜂窝数据已关闭
+    /// 因为iPad蜂窝版关闭蜂窝数据=iPhone讲这个蜂窝数据卡关闭，因此额外判断下
+    func getPadTurnOffCellularData() -> Bool {
+        var isPad = false
+
+        if #available(iOS 15.0, *) {
+            if let deviceType = getDeviceType() {
+                if deviceType == .pad {
+                    isPad = true
+                }
+            } else {
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    isPad = true
+                }
+            }
+        } else {
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                isPad = true
+            }
+        }
+
+        if isPad {
+            do {
+                let enabled = try coreTelephonyController.getCellularDataEnabled()
+                return !enabled
+            } catch {
+                return false
+            }
+        }
+
+        return false
+    }
+    
     /// 获取运营商锁状态
     func getDeviceCarrierLockState() -> InfoItem? {
         do {
@@ -1508,6 +1541,12 @@ class CellularDataController {
                         text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                         isConfidential: false
                     )
+                } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                    return InfoItem(
+                        id: CommonItemID.operatorName,
+                        text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                        isConfidential: false
+                    )
                 }
                 let operatorName = try coreTelephonyController.getSlotOperatorName(context: context)
                 return InfoItem(
@@ -1533,6 +1572,12 @@ class CellularDataController {
                 return InfoItem(
                     id: CommonItemID.operatorName,
                     text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    isConfidential: false
+                )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CommonItemID.operatorName,
+                    text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
                     isConfidential: false
                 )
             }
@@ -1561,6 +1606,12 @@ class CellularDataController {
                         text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                         isConfidential: false
                     )
+                } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                    return InfoItem(
+                        id: CommonItemID.operatorName,
+                        text: String.localizedStringWithFormat(NSLocalizedString("OperatorName", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                        isConfidential: false
+                    )
                 }
                 let operatorName = try coreTelephonyController.getSlotLocalizedOperatorName(context: context)
                 let EnglishName = try coreTelephonyController.getSlotEnglishCarrierName(operatorName: operatorName)
@@ -1583,14 +1634,20 @@ class CellularDataController {
     /// 获取网络名称的缩写
     func getSlotAbbreviatedOperatorName(context: CTXPCServiceSubscriptionContext) -> InfoItem? {
         do {
-            let abbreviatedOperatorName = try coreTelephonyController.getSlotAbbreviatedOperatorName(context: context)
             if radioPreferencesController.getAirplaneMode() { // 判断下是否在飞行模式状态
                 return InfoItem(
                     id: CommonItemID.abbreviatedOperatorName,
                     text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                     isConfidential: false
                 )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CommonItemID.abbreviatedOperatorName,
+                    text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                    isConfidential: false
+                )
             }
+            let abbreviatedOperatorName = try coreTelephonyController.getSlotAbbreviatedOperatorName(context: context)
             return InfoItem(
                 id: CommonItemID.abbreviatedOperatorName,
                 text: String.localizedStringWithFormat(NSLocalizedString("AbbreviatedOperatorName", comment: ""), abbreviatedOperatorName.isEmpty ? NSLocalizedString("NoService", comment: "") : abbreviatedOperatorName),
@@ -2018,6 +2075,12 @@ class CellularDataController {
                     text: String.localizedStringWithFormat(NSLocalizedString("RegistrationStatus", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                     isConfidential: false
                 )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.registrationStatus,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RegistrationStatus", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                    isConfidential: false
+                )
             }
             let RegistrationStatus = try coreTelephonyController.getSlotRegistrationStatus(context: context)
             return InfoItem(
@@ -2158,6 +2221,13 @@ class CellularDataController {
                 hintText: NSLocalizedString("PLMNHint", comment: ""),
                 isConfidential: false
             )
+        } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+            return InfoItem(
+                id: CoreTelephonyItemID.PLMN,
+                text: String.localizedStringWithFormat(NSLocalizedString("PLMN", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                hintText: NSLocalizedString("PLMNHint", comment: ""),
+                isConfidential: false
+            )
         }
         if #available(iOS 13.0, *) {
             do {
@@ -2208,6 +2278,13 @@ class CellularDataController {
                     hintText: NSLocalizedString("MCCHint", comment: ""),
                     isConfidential: false
                 )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingMCC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingMCC", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                    hintText: NSLocalizedString("MCCHint", comment: ""),
+                    isConfidential: false
+                )
             }
             let MCC = try coreTelephonyController.getSlotServingMCC(context: context)
             return InfoItem(
@@ -2234,6 +2311,13 @@ class CellularDataController {
                     return InfoItem(
                         id: CoreTelephonyItemID.lastKnownMCC,
                         text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMCC", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                        hintText: NSLocalizedString("MCCHint", comment: ""),
+                        isConfidential: false
+                    )
+                } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                    return InfoItem(
+                        id: CoreTelephonyItemID.lastKnownMCC,
+                        text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMCC", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
                         hintText: NSLocalizedString("MCCHint", comment: ""),
                         isConfidential: false
                     )
@@ -2299,6 +2383,13 @@ class CellularDataController {
                     hintText: NSLocalizedString("MNCHint", comment: ""),
                     isConfidential: false
                 )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingMNC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingMNC", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                    hintText: NSLocalizedString("MNCHint", comment: ""),
+                    isConfidential: false
+                )
             }
             let MNC = try coreTelephonyController.getSlotServingMNC(context: context)
             return InfoItem(
@@ -2324,6 +2415,13 @@ class CellularDataController {
                 return InfoItem(
                     id: CoreTelephonyItemID.lastKnownMNCCountryCode,
                     text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMNCCountryCode", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("MCCHint", comment: ""),
+                    isConfidential: false
+                )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.lastKnownMNCCountryCode,
+                    text: String.localizedStringWithFormat(NSLocalizedString("LastRegisteredNetworkMNCCountryCode", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
                     hintText: NSLocalizedString("MCCHint", comment: ""),
                     isConfidential: false
                 )
@@ -2468,6 +2566,12 @@ class CellularDataController {
                     text: String.localizedStringWithFormat(NSLocalizedString("RadioAccessTechnology", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                     isConfidential: false
                 )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.radioAccessTechnology,
+                    text: String.localizedStringWithFormat(NSLocalizedString("RadioAccessTechnology", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                    isConfidential: false
+                )
             }
             let radioAccessTechnology = try coreTelephonyController.getSlotRadioAccessTechnology(context: context)
             return InfoItem(
@@ -2497,11 +2601,19 @@ class CellularDataController {
                     )
                 }
                 if getSlotRadioAccessTechnology(context: context) == .NO_SERVICE { // 判断下是否是无服务状态
-                    return InfoItem(
-                        id: CoreTelephonyItemID.signalStrength,
-                        text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("NoService", comment: "")),
-                        isConfidential: false
-                    )
+                    if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                        return InfoItem(
+                            id: CoreTelephonyItemID.signalStrength,
+                            text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                            isConfidential: false
+                        )
+                    } else { // 无服务
+                        return InfoItem(
+                            id: CoreTelephonyItemID.signalStrength,
+                            text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("NoService", comment: "")),
+                            isConfidential: false
+                        )
+                    }
                 } else { // 显示信号格
                     let signalStrengthText = "\(signalStrength.displayBars!) / \(signalStrength.maxDisplayBars!)"
                     return InfoItem(
@@ -2862,7 +2974,14 @@ class CellularDataController {
         if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
             return InfoItem(
                 id: CoreTelephonyItemID.bandwidth,
-                text: String.localizedStringWithFormat(NSLocalizedString("Bandwidth", comment: ""), NSLocalizedString("AirplaneMode", comment: ""))
+                text: String.localizedStringWithFormat(NSLocalizedString("Bandwidth", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                isConfidential: false
+            )
+        } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+            return InfoItem(
+                id: CoreTelephonyItemID.bandwidth,
+                text: String.localizedStringWithFormat(NSLocalizedString("Bandwidth", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                isConfidential: false
             )
         }
         if let bandwidth = coreTelephonyController.getSlotServingBandwidth(cellInfo: cellInfo) {
@@ -2977,6 +3096,12 @@ class CellularDataController {
                 text: String.localizedStringWithFormat(NSLocalizedString("MaximumTransmitPowerLimit", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
                 hintText: NSLocalizedString("MaximumTransmitPowerLimitHint", comment: "")
             )
+        } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+            return InfoItem(
+                id: CoreTelephonyItemID.PMax,
+                text: String.localizedStringWithFormat(NSLocalizedString("MaximumTransmitPowerLimit", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                hintText: NSLocalizedString("MaximumTransmitPowerLimitHint", comment: "")
+            )
         }
         if let PMax = coreTelephonyController.getSlotPMax(cellInfo: cellInfo) {
             return InfoItem(
@@ -3070,6 +3195,13 @@ class CellularDataController {
                 hintText: NSLocalizedString("ServingTrackingAreaCodeHint", comment: ""),
                 isConfidential: true
             )
+        } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+            return InfoItem(
+                id: CoreTelephonyItemID.servingTAC,
+                text: String.localizedStringWithFormat(NSLocalizedString("ServingTrackingAreaCode", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                hintText: NSLocalizedString("ServingTrackingAreaCodeHint", comment: ""),
+                isConfidential: true
+            )
         } else if let TAC = coreTelephonyController.getSlotServingTrackingAreaCode(cellInfo: cellInfo) {
             return InfoItem(
                 id: CoreTelephonyItemID.servingTAC,
@@ -3088,6 +3220,12 @@ class CellularDataController {
                 return InfoItem(
                     id: CoreTelephonyItemID.servingLAC,
                     text: String.localizedStringWithFormat(NSLocalizedString("ServingLocationAreaCode", comment: ""), NSLocalizedString("AirplaneMode", comment: "")),
+                    hintText: NSLocalizedString("ServingLocationAreaCodeHint", comment: "")
+                )
+            } else if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                return InfoItem(
+                    id: CoreTelephonyItemID.servingLAC,
+                    text: String.localizedStringWithFormat(NSLocalizedString("ServingLocationAreaCode", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
                     hintText: NSLocalizedString("ServingLocationAreaCodeHint", comment: "")
                 )
             }
@@ -3275,6 +3413,8 @@ class CellularDataController {
             case 0: // 无服务 先判断下是否是飞行模式
                 if radioPreferencesController.getAirplaneMode() { // 先判断下是否是飞行模式
                     networkSelectionModeText = NSLocalizedString("AirplaneMode", comment: "")
+                } else if getPadTurnOffCellularData() { // 判断下是不是iPad关闭了蜂窝网络
+                    networkSelectionModeText = NSLocalizedString("CellularDataDisabled", comment: "")
                 } else {
                     networkSelectionModeText = NSLocalizedString("NoService", comment: "")
                 }
@@ -4740,12 +4880,33 @@ class CellularDataController {
                         isConfidential: false
                     )
                 }
-            } catch {
-                return InfoItem(
-                    id: CoreTelephonyRAWItemID.signalStrengthMeasurements,
-                    text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("NoPermission", comment: "")),
-                    isConfidential: false
-                )
+            } catch let error as NSError {
+                if error.code == 0 { // iPad 蜂窝版关闭蜂窝数据重启设备后 抛异常 错误代码 0
+                    if getPadTurnOffCellularData() { // 判断下是否是iPad关闭了蜂窝网络
+                        return InfoItem(
+                            id: CoreTelephonyRAWItemID.signalStrengthMeasurements,
+                            text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("CellularDataDisabled", comment: "")),
+                            isConfidential: false
+                        )
+                    }
+                    return InfoItem(
+                        id: CoreTelephonyRAWItemID.signalStrengthMeasurements,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("Unknown", comment: "未知")),
+                        isConfidential: false
+                    )
+                } else if error.code == 1 || error.code == 13 { // 无权限
+                    return InfoItem(
+                        id: CoreTelephonyRAWItemID.signalStrengthMeasurements,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), NSLocalizedString("NoPermission", comment: "")),
+                        isConfidential: false
+                    )
+                } else { // 其他情况
+                    return InfoItem(
+                        id: CoreTelephonyRAWItemID.signalStrengthMeasurements,
+                        text: String.localizedStringWithFormat(NSLocalizedString("SignalStrength", comment: ""), String.localizedStringWithFormat(NSLocalizedString("ErrorWithCodeReason", comment: ""), error.code ,error.localizedDescription)),
+                        isConfidential: false
+                    )
+                }
             }
         }
         return nil
