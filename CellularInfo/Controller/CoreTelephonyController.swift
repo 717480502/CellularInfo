@@ -523,9 +523,10 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     /// 无权限设备抛异常 错误代码 13
     /// 需要最低iOS 16的设备才能判断 低于iOS 16的设备绝对不支持卫星通信
     /// 该功能是iPhone 14 系列开始支持的 搭载的出厂系统版本为iOS 16.0
+    /// 根据用户报告iOS 16.0.2闪退，根据https://headers.82flex.com/ 认为该API的最低系统版本为16.2+
     /// 使用LL/A的iPhone 14 Pro Max iOS 16.2测试可以正常返回CTStewieSupport
     /// 使用LL/A的iPhone 13 Pro Max iOS 16.5测试抛异常 错误代码 45
-    @available(iOS 16.0, *)
+    @available(iOS 16.2, *)
     func getDeviceSupportsSatelliteCommunication() throws -> CTStewieSupport {
         return try coreTelephonyClient.getStewieSupport()
     }

@@ -231,8 +231,8 @@ typedef struct {
 -(void)copyRejectCauseCode:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2;
 -(NSNumber *)getRejectCauseCode:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error; // 被网络拒绝的原因代码
 -(void)getRadioPersonality:(CTXPCServiceSubscriptionContext *)context completion:(/*^block*/id)arg2;
--(CTStewieSupport *)getStewieSupport:(NSError **)error API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 同步方法
--(void)getStewieSupportWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 异步方法
+-(CTStewieSupport *)getStewieSupport:(NSError **)error API_AVAILABLE(ios(16.2)); // 设备是否支持卫星网络 同步方法
+-(void)getStewieSupportWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(16.2)); // 设备是否支持卫星网络 异步方法
 -(void)getTransferPlansWithCompletion:(/*^block*/id)arg1 ;
 -(BOOL)isDedicatedBearerPresent:(NSString *)arg1 error:(id*)arg2 ;
 -(void)refreshSweetgumApps:(id)arg1 completion:(/*^block*/id)arg2 ;

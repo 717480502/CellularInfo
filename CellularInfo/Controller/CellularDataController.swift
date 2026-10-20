@@ -508,7 +508,7 @@ class CellularDataController {
     
     /// 获取设备是否支持卫星通信
     private func getDeviceSupportsSatelliteCommunication() -> InfoItem {
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.2, *) {
             do {
                 let satelliteSupportsStatus = try coreTelephonyController.getDeviceSupportsSatelliteCommunication()
                 return InfoItem(
