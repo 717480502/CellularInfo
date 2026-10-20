@@ -164,7 +164,12 @@ class CellularDataController {
     
     /// 获取设备卡槽数量
     /// 无需额外权利即可获取
+    /// 线查询IMEI数量，如果无权限再去用公开方法查询
     func getSlotCount() -> Int {
+        if IMEICount != 0 {
+            return IMEICount
+        }
+        // 无需额外权利即可获取卡槽数量 但是会误判 比如CH/A的13 mini、SE 2、SE 2这种
         return coreTelephonyNetworkInfoController.getDeviceSlotCount()
     }
     
@@ -306,7 +311,7 @@ class CellularDataController {
             switch try coreTelephonyController.getDeviceDualSimCapability() {
             case 0: dualSimCapability = NSLocalizedString("NoPermission", comment: "")
             case 2: dualSimCapability = NSLocalizedString("DualSIM", comment: "")
-            case 3: dualSimCapability = NSLocalizedString("SingleSIM", comment: "")
+            case 1, 3: dualSimCapability = NSLocalizedString("SingleSIM", comment: "") // 单卡设备的返回值为1或3
             case 4: dualSimCapability = NSLocalizedString("Checking", comment: "") // 基带服务重启中会导致返回这个结果
             default: dualSimCapability = NSLocalizedString("Unknown", comment: "") + "(\(try! coreTelephonyController.getDeviceDualSimCapability()))"
             }
@@ -1788,11 +1793,24 @@ class CellularDataController {
                 text: String.localizedStringWithFormat(NSLocalizedString("UseIMEI", comment: ""), IMEI),
                 isConfidential: true
             )
-        } catch {
-            return InfoItem(
-                id: CommonItemID.useIMEI,
-                text: String.localizedStringWithFormat(NSLocalizedString("UseIMEI", comment: ""), NSLocalizedString("NoPermission", comment: ""))
-            )
+        } catch let error as NSError {
+            if error.code == 1 || error.code == 13 { // 无权限
+                return InfoItem(
+                    id: CommonItemID.useIMEI,
+                    text: String.localizedStringWithFormat(NSLocalizedString("UseIMEI", comment: ""), NSLocalizedString("NoPermission", comment: ""))
+                )
+            } else if error.code == 0 { // 越界访问，例如CH/A的iPhone 13 mini访问Slot 2的IMEI是不存在的
+                return InfoItem(
+                    id: CommonItemID.useIMEI,
+                    text: String.localizedStringWithFormat(NSLocalizedString("UseIMEI", comment: ""), NSLocalizedString("NotObtained", comment: ""))
+                )
+            } else { // 其他情况
+                return InfoItem(
+                    id: CommonItemID.useIMEI,
+                    text: String.localizedStringWithFormat(NSLocalizedString("UseIMEI", comment: ""), String.localizedStringWithFormat(NSLocalizedString("ErrorWithCodeReason", comment: ""), error.code, error.localizedDescription))
+                )
+            }
+            
         }
         
     }
@@ -5911,7 +5929,7 @@ class CellularDataController {
         if let slot1Group = getSlotInfoGroup(slotID: 1, inGroups: inGroups) {
             cellularDataGroups = cellularDataGroups + slot1Group
         }
-        if IMEICount > 1 { // IMEI有两个的再去获取卡槽2的数据，不然就是瞎浪费时间
+        if getSlotCount() > 1 { // IMEI有两个的再去获取卡槽2的数据，不然就是瞎浪费时间
             if let slot2Group = getSlotInfoGroup(slotID: 2, inGroups: inGroups) {
                 cellularDataGroups = cellularDataGroups + slot2Group
             }

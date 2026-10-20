@@ -204,12 +204,13 @@ class MainUITabBarController: UITabBarController {
         // iPhone Duo 外屏 竖屏 = 0
         // iPhone Duo 内屏 竖屏 = 82
         // iPad mini 6 竖屏 = 24
+        // iPad mini 7 竖屏 = 32 (模拟器获取)
         var badgeViewTopAnchor = CGFloat(0)
         
         switch view.safeAreaInsets.top {
         case 0: // iPhone Duo 外屏 竖屏
             badgeViewTopAnchor = -30
-        case 19..<26:
+        case 19..<33:
             badgeViewTopAnchor = -30
         case ..<45: // 老款刘海屏 放大模式
             badgeViewTopAnchor = 0.5

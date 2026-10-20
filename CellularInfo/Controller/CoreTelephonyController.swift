@@ -334,6 +334,7 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     }
     
     /// 双卡支持情况
+    /// CH/A版本的13 mini等 单卡  返回值 = 1
     /// 单卡+esim机器            返回值 = 2
     /// 魔改双卡槽 eSIM拆除（14pm）返回值 = 2
     /// 双实体卡                 返回值 = 2
@@ -1821,7 +1822,8 @@ class CoreTelephonyController : NSObject, CoreTelephonyClientDataDelegateInterna
     /// 包含IMEI IMSI EID 等信息
     /// 双卡槽设备获取的数据是不一样的
     /// 获取设备的信息用 getDeviceInfoList
-    /// 无权限时抛异常 错误代码1
+    /// 单卡设备访问Slot2 抛异常 错误代码0
+    /// 无权限时抛异常 错误代码 1 低版本系统错误代码 13
     func getSlotMobileEquipmentInfo(context: CTXPCServiceSubscriptionContext) throws -> CTMobileEquipmentInfo {
         return try coreTelephonyClient.getMobileEquipmentInfo(for: context)
     }

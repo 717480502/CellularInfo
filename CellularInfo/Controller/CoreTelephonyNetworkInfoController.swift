@@ -29,10 +29,12 @@ class CoreTelephonyNetworkInfoController {
     
     /// 无需额外权利的方法获取卡槽数量
     /// 无权限设备可以获取正确的数据
+    /// 但是可能会产生误判 例如CH/A版本的iPhone 12 mini/13 mini/SE 2/SE 3
     /// 模拟器返回0 因为没有基带模块
     func getDeviceSlotCount() -> Int {
         return getSlotDescriptors().count
     }
+    
     /// 获取设备卡槽的网络类型
     /// 官方文档 @See https://developer.apple.com/documentation/coretelephony/cttelephonynetworkinfo/servicecurrentradioaccesstechnology
     /// 返回值 官方文档 @See https://developer.apple.com/documentation/coretelephony/radio-access-technology-constants

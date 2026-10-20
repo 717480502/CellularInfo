@@ -191,7 +191,7 @@ typedef struct {
 -(void)context:(id)arg1 getCarrierBundleValue:(id)keyHierarchy completion:(/*^block*/id)arg3 ;
 - (id)context:(CTXPCServiceSubscriptionContext *)context getCarrierBundleValue:(NSArray<NSString *> *)keyHierarchy error:(NSError **)error; // 使用key获取IPCC中的Value 错误的数据类型会导致基带服务崩溃
 -(void)copyBundleIdentifier:(id)arg1 bundleType:(id)arg2 completion:(/*^block*/id)arg3 ;
--(id)copyBundleIdentifier:(id)arg1 bundleType:(id)arg2 error:(NSError **)error; // TODO
+-(id)copyBundleIdentifier:(CTXPCServiceSubscriptionContext *)context bundleType:(CTBundle *)bundleType error:(NSError **)error; // TODO bundleType的类型为CTBundle
 -(void)copyBundleLocation:(id)arg1 bundleType:(id)arg2 completion:(/*^block*/id)arg3 ;
 -(id)copyBundleLocation:(id)arg1 bundleType:(id)arg2 error:(NSError **)error; // TODO
 -(void)copyBundleVersion:(id)arg1 bundleType:(id)arg2 completion:(/*^block*/id)arg3 ;
@@ -214,7 +214,7 @@ typedef struct {
 -(void)checkForUpdatedBundlesWithAutoInstall:(BOOL)arg1 completion:(/*^block*/id)arg2 ;
 -(id)getCountryBundleIdentifierForCountryCode:(id)arg1 error:(id*)arg2 ;
 -(id)getCountryBundleLocationForBundleIdentifier:(id)arg1 error:(id*)arg2 ;
--(id)getCountryBundleLocationForMatchingInfo:(id)arg1 error:(id*)arg2 ;
+-(id)getCountryBundleLocationForMatchingInfo:(id)arg1 error:(id*)arg2 API_AVAILABLE(ios(16.0));
 -(void)getTetheringStatus:(/*^block*/id)arg1 API_AVAILABLE(ios(14.0));
 -(CTTetheringStatus *)getTetheringStatusSync:(NSError **)error API_AVAILABLE(ios(15.0)); // 获取一些关于网络共享的信息 经过测试需要iOS 15.0+ limneos网站数据存在错误
 -(void)getTetheringStatus:(/*^block*/id)arg1 connectionType:(int)arg2 API_AVAILABLE(ios(15.0));
@@ -224,7 +224,6 @@ typedef struct {
 -(BOOL)isTetheringEditingSupported:(CTXPCServiceSubscriptionContext *)context error:(NSError **)error NS_SWIFT_NOTHROW; // 是否支持编辑网络共享
 -(void)isTetheringEditingSupported:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)registerSetUpeSIMLaunchedEvent:(/*^block*/id)arg1 ;
-//-(void)setMaxDataRate:(id)arg1 rate:(long long)arg2 completion:(/*^block*/id)arg3 ;
 -(void)setMux:(CoreTelephonyClientMux *)arg1 ;
 -(void)websheetInfoForPlan:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)SIMUnlockProcedureDidComplete;
@@ -235,7 +234,7 @@ typedef struct {
 -(CTStewieSupport *)getStewieSupport:(NSError **)error API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 同步方法
 -(void)getStewieSupportWithCompletion:(/*^block*/id)arg1 API_AVAILABLE(ios(16.0)); // 设备是否支持卫星网络 异步方法
 -(void)getTransferPlansWithCompletion:(/*^block*/id)arg1 ;
--(BOOL)isDedicatedBearerPresent:(id)arg1 error:(id*)arg2 ;
+-(BOOL)isDedicatedBearerPresent:(NSString *)arg1 error:(id*)arg2 ;
 -(void)refreshSweetgumApps:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(void)submitSimSetupUsage:(id)arg1 completion:(/*^block*/id)arg2 ;
 -(id)userEnteredMonthlyBudget:(id)arg1 error:(id*)arg2 ;

@@ -11,7 +11,7 @@ before-all::
 
 # 使用 Xcode 项目构建
 XCODEPROJ_NAME = CellularInfo
-BUILD_VERSION = "1.1.1"
+BUILD_VERSION = "1.1.2"
 FILE_NAME = "com.developlab.cellularinfo"
 
 # 指定 Theos 使用 xcodeproj 规则
