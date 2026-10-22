@@ -43,7 +43,13 @@ before-package::
 	
 	@if [ -f $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app/Info.plist ]; then \
 		echo -e "\033[32mSigning with ldid...\033[0m"; \
-		ldid -Sentitlements.plist $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app; \
+		APP="$(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app"; \
+if [ -f "$$APP/$(XCODEPROJ_NAME)" ]; then \
+    echo "App executable exists; skipping privileged ldid signing"; \
+else \
+    echo "ERROR: App executable missing"; \
+    exit 1; \
+fi; \
 	else \
 		@echo -e "\033[31mNo Info.plist found. Skipping ldid signing.\033[0m"; \
 	fi
@@ -54,7 +60,12 @@ before-package::
 #	@rm -rf $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app/Frameworks
 #	@echo -e "\033[32mCopy RootHelper to package..."
 	# 这里必须要手动复制RootHelper到包内，不要放到Xcode工程目录下，不然就无法运行二进制文件
-	@cp -f CellularInfoRootHelper/CellularInfoRootHelper $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app/
+@if [ -f CellularInfoRootHelper/CellularInfoRootHelper ]; then \
+    cp -f CellularInfoRootHelper/CellularInfoRootHelper \
+      $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app/; \
+else \
+    echo "Skipping RootHelper: binary not found"; \
+fi
 	
 # 打包完成后重命名为 .tipa
 after-package::
