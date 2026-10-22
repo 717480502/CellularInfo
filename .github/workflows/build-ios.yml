@@ -1,0 +1,36 @@
+
+name: Build CellularInfo IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          brew install ldid make
+          git clone --recursive \
+            https://github.com/theos/theos.git \
+            "$HOME/theos"
+
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
+
+      - name: Build application
+        run: |
+          make package \
+            FINALPACKAGE=1 \
+            PACKAGE_FORMAT=ipa
+
+      - name: Collect packages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CellularInfo-build
+          path: packages/*
+          if-no-files-found: warn
